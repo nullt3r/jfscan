@@ -11,7 +11,7 @@ First, install a libpcap-dev (Debian based distro) or libcap-devel (Centos based
 sudo apt install libpcap-dev
 ```
 
-Next clone the official repository and install:
+Next, clone the official repository and install:
 ```
 sudo apt-get --assume-yes install git make gcc
 git clone https://github.com/robertdavidgraham/masscan
@@ -21,7 +21,7 @@ sudo make install
 ```
 
 
-1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW permission to the binary:
+1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW capability to the binary:
 
 ```
 sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
