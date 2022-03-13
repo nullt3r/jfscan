@@ -33,7 +33,7 @@ sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
 sudo apt install python3 python3-pip
 ```
 
-4. Installing JFScan:
+4. Install JFScan:
 ```
 $ git clone https://github.com/nullt3r/jfscan.git
 $ cd jfscan
