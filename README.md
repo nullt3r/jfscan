@@ -5,6 +5,7 @@ The JFScan (Just Fu*king Scan) is a wrapper around a super-fast network scanner 
 
 The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei.
 
+## Diagram
 ![logo](screenshots/for_dummies.png)
 
 # Usage
