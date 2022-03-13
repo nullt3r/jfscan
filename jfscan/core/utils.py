@@ -148,7 +148,10 @@ class Utils:
             _file = open(targets, "r")
             _reader = _file.readlines()
         else:
-            _reader = sys.stdin.readlines()
+            try:
+                _reader = sys.stdin.readlines()
+            except KeyboardInterrupt:
+                raise SystemExit
 
         for target in _reader:
             target = target.strip()
