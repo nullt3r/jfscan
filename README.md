@@ -47,6 +47,12 @@ Add the following line to your `~/.zshrc` or `~/.bashrc`:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+5. Additional steps:
+For enum_amass module to work, install Amass:
+```
+snap install amass
+```
+
 # Usage
 
 Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
@@ -107,6 +113,9 @@ Read file LICENSE.
 # Disclaimer
 I am not responsible for any damages. You are responsible for your own
 actions. Attacking targets without prior mutual consent is illegal.
+
+# Known issues
+* Running enum_amass will take forever if there is more then 10 domains on the input.
 
 # TODO
 * Transfer Resources object to a database (SQLite). It's getting too complex.
