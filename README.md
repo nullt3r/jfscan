@@ -5,6 +5,13 @@ The JFScan (Just Fu*king Scan) is a Masscan wrapper designed to simplify work wh
 # Installation
 1. Before installation, make sure you have the latest version of Masscan installed (tested version is 1.3.2).
 
+First, install a libpcap-dev (Debian based distro) or libcap-devel (Centos based distro):
+
+```
+sudo apt install libpcap-dev
+```
+
+Next clonse the official repository and install:
 ```
 sudo apt-get --assume-yes install git make gcc
 git clone https://github.com/robertdavidgraham/masscan
@@ -12,6 +19,7 @@ cd masscan
 make
 sudo make install
 ```
+
 
 1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW permission to the binary:
 
@@ -21,6 +29,11 @@ sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
 
 3. For installation of JFscan a python3 and pip3 is required.
 
+```
+sudo apt install python3 python3-pip
+```
+
+4. Installing JFScan:
 ```
 $ git clone https://github.com/nullt3r/jfscan.git
 $ cd jfscan
@@ -36,7 +49,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Usage
 
-The JFScan must be run under root because of the Masscan. You can also run it without sudo, but password will be required later.
+Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
 usage: jfscan [-h] -t TARGETS [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q]
