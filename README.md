@@ -3,6 +3,8 @@
 # Description
 The JFScan (Just Fu*king Scan) is a wrapper around a super-fast network scanner Masscan. It's designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin. The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei.
 
+![logo](screenshots/usage_example.png)
+
 # Usage
 
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
@@ -30,9 +32,6 @@ optional arguments:
 ```
 
 ## Example
-![logo](screenshots/usage_example.png)
-
-
 Scan targets for only for ports 80 and 443 with rate of 10 kpps:
 
 `$ jfscan -p 80,443 -t targets.txt -r 10000`
