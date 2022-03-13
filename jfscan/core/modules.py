@@ -44,11 +44,11 @@ class Modules:
 
         if top_ports is not None:
             result = Utils.handle_command(
-                f"sudo masscan --open --top-ports {top_ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+                f"masscan --open --top-ports {top_ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
             )
         else:
             result = Utils.handle_command(
-                f"sudo masscan --open -p {ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+                f"masscan --open -p {ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
             )
 
         if Utils.file_is_empty(masscan_output):
