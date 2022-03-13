@@ -68,7 +68,9 @@ The CIDR format is not supported, but will be implemented in the next release.
 # License
 Read file LICENSE.
 
-
 # Disclaimer
 I am not responsible for any damages. You are responsible for your own
 actions. Attacking targets without prior mutual consent is illegal.
+
+# TODO
+* Transfer Resources object to a database (SQLite). It's getting too complex.
