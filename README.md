@@ -8,13 +8,13 @@ A python3 is required.
 ```
 $ git clone https://github.com/nullt3r/jfscan.git
 $ cd jfscan
-$ python3 setup.py install
+$ pip3 install .
 ```
 
 # Usage
 
 ```
-usage: __main__.py [-h] -t TARGETS [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q]
+usage: jfscan [-h] -t TARGETS [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q]
 
 JFScan - Just Fu*king Scan
 
