@@ -101,8 +101,6 @@ domain.com
 1.2.3.0/24
 ```
 
-The CIDR format is not supported, but will be implemented in the next release.
-
 # License
 Read file LICENSE.
 
