@@ -1,4 +1,5 @@
 ![logo](screenshots/jfscan_logo.png)
+![GitHub](https://img.shields.io/github/license/nullt3r/jfscan)
 # Description
 The JFScan (Just Fu*king Scan) is a Masscan wrapper designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin. The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei.
 
