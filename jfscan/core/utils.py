@@ -71,11 +71,10 @@ class Utils:
 
         except subprocess.CalledProcessError as e:
             logging.error(
-                "%s: there was an exception while running command %s: %s\n%s",
+                "%s: there was an exception while running command %s: %s",
                 inspect.stack()[0][3],
                 cmd,
-                e,
-                result.stderr
+                e
             )
 
         return result
