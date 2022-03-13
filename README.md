@@ -46,7 +46,7 @@ Scan targets for top 1000 ports and utilize crt.sh module:
 
 You can also specify targets on stdin and pipe it to nuclei:
 
-`$ cat targets.txt | jfscan --top-ports 1000 -m enum_crtsh | nuclei`
+`$ cat targets.txt | jfscan --top-ports 1000 -m enum_crtsh | httpx -silent | nuclei`
 
 The targets.txt can contain targets in the following forms:
 ```
