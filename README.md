@@ -3,57 +3,6 @@
 # Description
 The JFScan (Just Fu*king Scan) is a Masscan wrapper designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin. The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei.
 
-# Installation
-1. Before installation, make sure you have the latest version of Masscan installed (tested version is 1.3.2).
-
-First, install a libpcap-dev (Debian based distro) or libcap-devel (Centos based distro):
-
-```
-sudo apt install libpcap-dev
-```
-
-Next, clone the official repository and install:
-```
-sudo apt-get --assume-yes install git make gcc
-git clone https://github.com/robertdavidgraham/masscan
-cd masscan
-make
-sudo make install
-```
-
-
-1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW capability to the binary:
-
-```
-sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
-```
-
-3. For installation of JFscan a python3 and pip3 is required.
-
-```
-sudo apt install python3 python3-pip
-```
-
-4. Install JFScan:
-```
-$ git clone https://github.com/nullt3r/jfscan.git
-$ cd jfscan
-$ pip3 install .
-```
-If you can't run the jfscan directly from command line you should check if $HOME/.local/bin is in your path.
-
-Add the following line to your `~/.zshrc` or `~/.bashrc`:
-
-```
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-5. Additional steps:
-For enum_amass module to work, install Amass:
-```
-snap install amass
-```
-
 # Usage
 
 Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
@@ -106,6 +55,57 @@ http://domain.com/
 domain.com
 1.2.3.4
 1.2.3.0/24
+```
+
+# Installation
+1. Before installation, make sure you have the latest version of Masscan installed (tested version is 1.3.2).
+
+First, install a libpcap-dev (Debian based distro) or libcap-devel (Centos based distro):
+
+```
+sudo apt install libpcap-dev
+```
+
+Next, clone the official repository and install:
+```
+sudo apt-get --assume-yes install git make gcc
+git clone https://github.com/robertdavidgraham/masscan
+cd masscan
+make
+sudo make install
+```
+
+
+1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW capability to the binary:
+
+```
+sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
+```
+
+3. For installation of JFscan a python3 and pip3 is required.
+
+```
+sudo apt install python3 python3-pip
+```
+
+4. Install JFScan:
+```
+$ git clone https://github.com/nullt3r/jfscan.git
+$ cd jfscan
+$ pip3 install .
+```
+If you can't run the jfscan directly from command line you should check if $HOME/.local/bin is in your path.
+
+Add the following line to your `~/.zshrc` or `~/.bashrc`:
+
+```
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+5. Additional steps:
+For enum_amass module to work, install Amass:
+```
+snap install amass
 ```
 
 # License
