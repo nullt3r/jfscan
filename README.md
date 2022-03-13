@@ -11,7 +11,7 @@ First, install a libpcap-dev (Debian based distro) or libcap-devel (Centos based
 sudo apt install libpcap-dev
 ```
 
-Next clonse the official repository and install:
+Next clone the official repository and install:
 ```
 sudo apt-get --assume-yes install git make gcc
 git clone https://github.com/robertdavidgraham/masscan
