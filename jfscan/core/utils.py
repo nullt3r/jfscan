@@ -190,7 +190,7 @@ class Utils:
         if modules is None:
             return
 
-        from core.modules import Modules
+        from jfscan.core.modules import Modules
 
         for module in modules.split(","):
             if module in modules:
