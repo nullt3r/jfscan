@@ -30,7 +30,7 @@ optional arguments:
 ```
 
 ## Example
-![example](screenshots/sample_scan.png)
+![logo](screenshots/jfscan_logo.png)
 
 
 Scan targets for only for ports 80 and 443 with rate of 10 kpps:
