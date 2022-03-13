@@ -74,3 +74,4 @@ actions. Attacking targets without prior mutual consent is illegal.
 
 # TODO
 * Transfer Resources object to a database (SQLite). It's getting too complex.
+* Update logging, create new logging class for each usecase.

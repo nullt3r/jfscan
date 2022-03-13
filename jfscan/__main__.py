@@ -8,7 +8,7 @@ from jfscan.core.resources import Resources
 from jfscan.core.utils import Utils
 from jfscan.core.modules import Modules
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="JFScan - Just Fu*king Scan")
     
     group_ports = parser.add_mutually_exclusive_group(required=True)
@@ -132,3 +132,7 @@ if __name__ == "__main__":
 
     for line in sorted(results):
         print(line)
+
+
+if __name__ == "__main__":
+    main()
