@@ -10,7 +10,7 @@ $ git clone https://github.com/nullt3r/jfscan.git
 $ cd jfscan
 $ pip3 install .
 ```
-If you can not run jfscan directly from command line you should check if $HOME/.local/bin is in your path.
+If you can't run the jfscan directly from command line you should check if $HOME/.local/bin is in your path.
 
 Add the following line to your `~/.zshrc` or `~/.bashrc`:
 `export PATH="$HOME/.local/bin:$PATH"`
