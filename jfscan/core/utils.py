@@ -148,10 +148,7 @@ class Utils:
             _file = open(targets, "r")
             _reader = _file.readlines()
         else:
-            while True:
-                _reader = sys.stdin.readlines()
-                if not _reader:
-                    break
+            _reader = sys.stdin.readlines()
 
         for target in _reader:
             target = target.strip()
