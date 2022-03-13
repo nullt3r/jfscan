@@ -6,10 +6,9 @@ The JFScan (Just Fu*king Scan) is a wrapper around a super-fast network scanner 
 ![logo](screenshots/for_dummies.png)
 
 # Usage
-![logo](screenshots/usage_example.png)
-
 ![logo](screenshots/usage_example2.png)
 
+![logo](screenshots/usage_example.png)
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
