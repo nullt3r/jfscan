@@ -3,7 +3,23 @@
 The JFScan (Just Fu*king Scan) is a Masscan wrapper designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin. The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei.
 
 # Installation
-A python3 is required.
+1. Before installation, make sure you have the latest version of Masscan installed (tested version is 1.3.2).
+
+```
+sudo apt-get --assume-yes install git make gcc
+git clone https://github.com/robertdavidgraham/masscan
+cd masscan
+make
+sudo make install
+```
+
+1. The Masscan requires root permissions to run. Since running binaries under root is not good idea, we will set a CAP_NET_RAW permission to the binary:
+
+```
+sudo setcap CAP_NET_RAW+ep /usr/bin/masscan
+```
+
+3. For installation of JFscan a python3 and pip3 is required.
 
 ```
 $ git clone https://github.com/nullt3r/jfscan.git
@@ -14,7 +30,9 @@ If you can't run the jfscan directly from command line you should check if $HOME
 
 Add the following line to your `~/.zshrc` or `~/.bashrc`:
 
-`export PATH="$HOME/.local/bin:$PATH"`
+```
+export PATH="$HOME/.local/bin:$PATH"
+```
 
 # Usage
 
