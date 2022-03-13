@@ -10,8 +10,14 @@ $ git clone https://github.com/nullt3r/jfscan.git
 $ cd jfscan
 $ pip3 install .
 ```
+If you can not run jfscan directly from command line you should check if $HOME/.local/bin is in your path.
+
+Add the following line to your `~/.zshrc` or `~/.bashrc`:
+`export PATH="$HOME/.local/bin:$PATH"`
 
 # Usage
+
+The JFScan must be run under root because of the Masscan. You can also run it without sudo, but password will be required later.
 
 ```
 usage: jfscan [-h] -t TARGETS [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q]
