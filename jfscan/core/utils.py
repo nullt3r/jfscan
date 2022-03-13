@@ -150,7 +150,16 @@ class Utils:
         else:
             _reader = sys.stdin.readlines()
 
+        target_before = None
+
         for target in _reader:
+
+            if validators.url(target):
+                target = target.split("/")[2]
+
+            if target == target_before:
+                continue
+
             target = target.strip()
 
             if validators.domain(target):
@@ -162,14 +171,7 @@ class Utils:
             elif validators.ipv4_cidr(target) or validators.ipv6_cidr(target):
                 res.add_cidr(target)
 
-            elif validators.url(target):
-                target = target.split("/")[2]
-
-                if validators.domain(target):
-                    res.add_domain(target)
-
-                elif validators.ipv4(target) or validators.ipv6(target):
-                    res.add_ip(target)
+            target_before = target
         
         if is_tty:
             _file.close()
