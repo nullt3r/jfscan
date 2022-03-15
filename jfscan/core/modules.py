@@ -29,7 +29,7 @@ class Modules:
 
     @classmethod
     def scan_nmap(cls, resources, nmap_options, nmap_threads = 8):
-        logging.info("%s: scanning started", inspect.stack()[0][3])
+        logging.info("%s: scanning started\n", inspect.stack()[0][3])
 
         if len(resources.get_ips_and_ports()) == 0:
             logging.error(
