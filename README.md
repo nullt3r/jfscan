@@ -45,7 +45,7 @@ optional arguments:
 
   --nmap                run nmap on discovered ports
   --nmap-options NMAP_OPTIONS
-                        nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --scripts ssh-auth-methods'
+                        nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --script ssh-auth-methods'
   --nmap-threads NMAP_THREADS
                         number of nmaps to run concurrently, default 8
 ```

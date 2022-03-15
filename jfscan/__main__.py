@@ -92,7 +92,7 @@ def main():
     group_nmap.add_argument(
         "--nmap-options",
         action="store",
-        help="nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --scripts ssh-auth-methods'",
+        help="nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --script ssh-auth-methods'",
     )
 
     group_nmap.add_argument(
