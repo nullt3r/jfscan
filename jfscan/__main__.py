@@ -57,6 +57,7 @@ def main():
         "--max-rate",
         action="store",
         type=int,
+        default=30000,
         help="max kpps rate",
         required=False,
     )
@@ -123,8 +124,6 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
 
     if arg_top_ports is not None:
-        if arg_max_rate is None:
-            arg_max_rate = 30000
         scan_masscan_args = (None, arg_max_rate, arg_top_ports)
     else:
         port_chars = re.compile(r"^[0-9,\-]+$")
