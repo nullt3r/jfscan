@@ -22,7 +22,10 @@ class Modules:
 
         _stdout = "\n".join(result.stdout.decode("utf-8").splitlines()[1:][:-2]) + "\n"
 
-        print(f"------ {host} ({domain}) ------------------------------------------------------------------\n" + _stdout)
+        
+        f_host_domain = f" {host} ({domain}) "
+
+        print("-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + _stdout)
 
 
     @classmethod
