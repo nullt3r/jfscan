@@ -17,9 +17,11 @@ Finally, it can scan discovered ports with Nmap, you can also define custom opti
 ![logo](screenshots/for_dummies.png)
 
 # Usage
-![logo](screenshots/usage_example2.png)
+![usage](screenshots/masscan_nmap.png)
 
-![logo](screenshots/usage_example.png)
+![usage](screenshots/usage_example2.png)
+
+![usage](screenshots/usage_example.png)
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
