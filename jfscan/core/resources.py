@@ -89,12 +89,12 @@ class Resources:
                 addresses.append(tcp["ip"])
         return list(set(addresses))
 
-    def get_ips_and_ports(self):
+    def get_domains_ips_and_ports(self):
         results = []
         for resource in self.resources:
             for tcp in resource.get("tcp"):
                 for port in tcp.get("ports"):
-                    results.append((tcp['ip'], port))
+                    results.append((resource.get('domain'), tcp['ip'], port))
 
         return list(set(results))
 
