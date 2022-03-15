@@ -22,7 +22,7 @@ class Modules:
             f"nmap -Pn {host} -p {port} {options} -oG {single_output_name}"
         )
 
-        _stdout = result.stdout.decode("ascii")
+        _stdout = "\n".join(result.stdout.decode("utf-8").splitlines()[1:][:-2]) + "\n"
 
         print(_stdout)
 

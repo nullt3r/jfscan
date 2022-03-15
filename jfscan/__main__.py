@@ -141,7 +141,7 @@ def main():
             parser.error("output arguments -oNSXG are not permitted unfortunately, you can save the stdin for now")
 
         result = subprocess.run(
-                f"nmap -sL 0.0.0.0/24 {arg_nmap_options}",
+                f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
                 capture_output=True,
                 shell=True,
                 check=False,
