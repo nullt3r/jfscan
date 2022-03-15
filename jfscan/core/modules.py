@@ -19,7 +19,7 @@ class Modules:
         single_output_name = f"._{Utils.random_string()}.tmp"
 
         result = Utils.handle_command(
-            f"nmap {host} -p {port} {options} -oG {single_output_name}"
+            f"nmap -Pn {host} -p {port} {options} -oG {single_output_name}"
         )
 
         _stdout = result.stdout.decode("ascii")
