@@ -89,7 +89,7 @@ class Modules:
             except:
                 pass
 
-            return
+            raise SystemExit
 
         with open(masscan_output, "r") as masscan_results:
             masscan_results = json.load(masscan_results)
