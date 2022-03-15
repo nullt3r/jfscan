@@ -1,9 +1,17 @@
 ![logo](screenshots/jfscan_logo.png)
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan)
 # Description
+## Killing features
+* Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids. Faster then Rustscan.
+* Allows to scan targets in multiple formats.
+* Can output results in domain:port format.
+* Works in stdin/stdout mode, so you can pipe results to other tools.
+
 The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin.
 
 The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei. The domain:port output of JFScan is crucial if you want to discover vulnerabilities in web applications as virtual host decides which content will be served.
+
+Finally, it can scan discovered ports with Nmap, you can also define custom options and use Nmaps amazing scripting capabilities.
 
 ## Diagram
 ![logo](screenshots/for_dummies.png)
@@ -15,7 +23,7 @@ The JFScan also allows you to output only the results and chain it with other to
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
-usage: jfscan [-h] -t TARGETS [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q]
+usage: jfscan [-h] [-t TARGETS] [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q] [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS]
 
 JFScan - Just Fu*king Scan
 
@@ -34,6 +42,12 @@ optional arguments:
   -oi, --only-ips       output only IP adresses, default: all resources
   -od, --only-domains   output only domains, default: all resources
   -q, --quite           output only results
+
+  --nmap                run nmap on discovered ports
+  --nmap-options NMAP_OPTIONS
+                        nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --scripts ssh-auth-methods'
+  --nmap-threads NMAP_THREADS
+                        number of nmaps to run concurrently, default 8
 ```
 
 ## Example
@@ -52,6 +66,10 @@ Scan targets for top 1000 ports and utilize crt.sh module:
 You can also specify targets on stdin and pipe it to nuclei:
 
 `$ cat targets.txt | jfscan --top-ports 1000 -m enum_crtsh | httpx -silent | nuclei`
+
+Utilize nmap to gather more info about discovered services:
+
+`$ cat targets.txt | jfscan -p 0-65535 --nmap --nmap-options="-sV --scripts ssh-auth-methods"`
 
 The targets.txt can contain targets in the following forms:
 ```

@@ -3,6 +3,7 @@ import logging
 import argparse
 import sys
 import re
+import subprocess
 
 from jfscan.core.resources import Resources
 from jfscan.core.utils import Utils
@@ -12,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description="JFScan - Just Fu*king Scan")
     
     group_ports = parser.add_mutually_exclusive_group(required=True)
+    group_nmap = parser.add_argument_group()
 
     modules = [method for method in dir(Modules) if method.startswith("enum_") is True]
 
@@ -80,6 +82,25 @@ def main():
         required=False,
     )
 
+    group_nmap.add_argument(
+        "--nmap",
+        action="store_true",
+        help="run nmap on discovered ports",
+    )
+
+    group_nmap.add_argument(
+        "--nmap-options",
+        action="store",
+        help="nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --scripts ssh-auth-methods'",
+    )
+
+    group_nmap.add_argument(
+        "--nmap-threads",
+        action="store",
+        type=int,
+        help="number of nmaps to run concurrently, default 8",
+    )
+
     args = parser.parse_args()
 
     arg_ports = args.ports
@@ -89,15 +110,17 @@ def main():
     arg_only_domains = args.only_domains
     arg_only_ips = args.only_ips
     arg_top_ports = args.top_ports
-    
+    arg_nmap = args.nmap
+    arg_nmap_options = args.nmap_options
+    arg_nmap_threads = args.nmap_threads
+
     res = Resources()
 
     if args.quite:
-        logging.basicConfig(level=logging.ERROR)
+        logging.getLogger().setLevel(logging.ERROR)
     else:
         Utils.print_banner()
-        logging.basicConfig(level=logging.INFO)
-
+        logging.getLogger().setLevel(logging.INFO)
 
     if arg_top_ports is not None:
         scan_masscan_args = (None, arg_max_rate, arg_top_ports)
@@ -108,10 +131,35 @@ def main():
             raise SystemExit
         scan_masscan_args = (arg_ports, arg_max_rate, None)
 
+
+    if arg_nmap:
+        if arg_nmap_options is None:
+            parser.error("--nmap requires argument --nmap-options.")
+
+        if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
+            parser.error("output arguments -oNSXG are not permitted unfortunately, you can save the stdin for now")
+
+        result = subprocess.run(
+                f"nmap -sL 0.0.0.0/24 {arg_nmap_options}",
+                capture_output=True,
+                shell=True,
+                check=False,
+            )
+
+        if result.returncode != 0:
+            logging.fatal(" incorrect nmap options: \n\n%s", result.stderr.decode("UTF-8"))
+            raise SystemExit
+
     try:
+        Utils.check_dependency("nmap", "--version", "Nmap version 7.")
+        Utils.check_dependency("masscan", "--version", "1.3.2")
+
         Utils.load_targets(res, arg_targets, is_tty)
         Utils.load_modules(res, arg_modules)
         Modules.scan_masscan(res, *scan_masscan_args)
+
+        if arg_nmap:
+            Modules.scan_nmap(res, arg_nmap_options, arg_nmap_threads)
 
     except KeyboardInterrupt:
         logging.fatal(" ctrl+c received, exiting")
@@ -121,17 +169,18 @@ def main():
     """
     Report results
     """
-    if arg_only_domains == True:
-        results = res.get_list(ips=False, domains=True)
+    if not arg_nmap:
+        if arg_only_domains == True:
+            results = res.get_list(ips=False, domains=True)
 
-    elif arg_only_ips == True:
-        results = res.get_list(ips=True, domains=False)
+        elif arg_only_ips == True:
+            results = res.get_list(ips=True, domains=False)
 
-    else:
-        results = res.get_list(ips=True, domains=True)
+        else:
+            results = res.get_list(ips=True, domains=True)
 
-    for line in sorted(results):
-        print(line)
+        for line in sorted(results):
+            print(line)
 
 
 if __name__ == "__main__":

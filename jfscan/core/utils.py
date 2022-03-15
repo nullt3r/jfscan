@@ -74,9 +74,8 @@ class Utils:
                 "%s: there was an exception while running command %s: %s",
                 inspect.stack()[0][3],
                 cmd,
-                e
+                e,
             )
-
         return result
 
     @staticmethod

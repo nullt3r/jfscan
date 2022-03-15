@@ -89,6 +89,15 @@ class Resources:
                 addresses.append(tcp["ip"])
         return list(set(addresses))
 
+    def get_ips_and_ports(self):
+        results = []
+        for resource in self.resources:
+            for tcp in resource.get("tcp"):
+                for port in tcp.get("ports"):
+                    results.append((tcp['ip'], port))
+
+        return list(set(results))
+
     def get_cidrs(self):
         if self.cidrs is not None and len(self.cidrs) != 0:
             return list(set(self.cidrs))

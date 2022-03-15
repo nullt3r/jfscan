@@ -6,11 +6,41 @@ import validators
 import os
 import time
 import requests
+import multiprocessing
 
 from jfscan.core.utils import Utils
 
 
 class Modules:
+    @staticmethod
+    def _run_single_nmap(_args):
+        host, port, options = _args
+
+        single_output_name = f"._{Utils.random_string()}.tmp"
+
+        result = Utils.handle_command(
+            f"nmap {host} -p {port} {options} -oG {single_output_name}"
+        )
+
+        _stdout = result.stdout.decode("utf-8")
+
+        print(_stdout)
+
+
+    @classmethod
+    def scan_nmap(cls, resources, nmap_options, nmap_threads = 8):
+        logging.info("%s: scanning started", inspect.stack()[0][3])
+
+        if len(resources.get_ips_and_ports()) == 0:
+            logging.error(
+                "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
+            )
+            return
+
+        processPool = multiprocessing.Pool(processes=nmap_threads)
+        run = processPool.map(cls._run_single_nmap, [t + (nmap_options, ) for t in resources.get_ips_and_ports()])
+        processPool.close()
+
     @staticmethod
     def scan_masscan(resources, ports, max_rate=30000, top_ports = None):
         """
@@ -18,9 +48,6 @@ class Modules:
         Author: nullt3r
 
         """
-
-        Utils.check_dependency("masscan", "--version", "1.3.2")
-
         logging.info("%s: port scanning started", inspect.stack()[0][3])
 
         if len(resources.get_ips()) == 0 and len(resources.get_cidrs()) == 0:
@@ -53,7 +80,7 @@ class Modules:
 
         if Utils.file_is_empty(masscan_output):
             logging.error(
-                "%s: no output from masscan, something went wrong",
+                "%s: no output from masscan, something went wrong or no open ports were discovered",
                 inspect.stack()[0][3],
             )
             try:
