@@ -23,7 +23,7 @@ class Utils:
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ 
                                         
-    Just Fu*king Scan / version: 1.0.0 / author: nullt3r
+    Just Fu*king Scan / version: 1.0.1 / author: nullt3r
         
         """
         )
