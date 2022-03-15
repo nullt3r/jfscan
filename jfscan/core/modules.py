@@ -55,7 +55,7 @@ class Modules:
             logging.error(
                 "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
             )
-            return
+            raise SystemExit
         
 
         masscan_input = f"._{Utils.random_string()}.tmp"
