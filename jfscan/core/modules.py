@@ -43,6 +43,12 @@ class Modules:
         run = processPool.map(cls._run_single_nmap, [t + (nmap_options, ) for t in resources.get_domains_ips_and_ports()])
         processPool.close()
 
+        """
+        Fix terminal, somehow terminal gets broken after running nmap
+        """
+        result = Utils.handle_command("stty sane")
+
+
     @staticmethod
     def scan_masscan(resources, ports, max_rate=30000, top_ports = None):
         """
