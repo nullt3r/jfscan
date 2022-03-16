@@ -184,7 +184,7 @@ def main():
         for line in sorted(results):
             print(line)
 
-    os.system('stty sane')
+    os.system('echo')
 
 if __name__ == "__main__":
     main()
