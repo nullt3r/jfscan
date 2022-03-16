@@ -4,6 +4,7 @@ import argparse
 import sys
 import re
 import subprocess
+import os
 
 from jfscan.core.resources import Resources
 from jfscan.core.utils import Utils
@@ -183,6 +184,7 @@ def main():
         for line in sorted(results):
             print(line)
 
+    os.system('stty sane')
 
 if __name__ == "__main__":
     main()
