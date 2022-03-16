@@ -19,7 +19,7 @@ class Modules:
         nmap_output = f"/tmp/_{Utils.random_string()}"
         
         result = Utils.handle_command(
-            f"nmap -Pn {host} -p {port} {options} -oN {nmap_output}"
+            f"nmap -Pn {host} -p {port} {options} -oN {nmap_output}; stty sane"
         )
 
         _stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
@@ -42,11 +42,6 @@ class Modules:
         processPool = multiprocessing.Pool(processes=nmap_threads)
         run = processPool.map(cls._run_single_nmap, [t + (nmap_options, ) for t in resources.get_domains_ips_and_ports()])
         processPool.close()
-
-        """
-        Fix terminal, somehow terminal gets broken after running nmap
-        """
-        os.system("stty sane")
 
 
     @staticmethod
