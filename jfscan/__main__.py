@@ -139,7 +139,7 @@ def main():
             parser.error("--nmap requires argument --nmap-options.")
 
         if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
-            parser.error("output arguments -oNSXG are not permitted unfortunately, you can save the stdin for now")
+            parser.error("output arguments -oNSXG are not permitted unfortunately, you can save the stdout for now")
 
         result = subprocess.run(
                 f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
