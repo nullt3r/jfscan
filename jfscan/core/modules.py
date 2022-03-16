@@ -15,13 +15,16 @@ class Modules:
     @staticmethod
     def _run_single_nmap(_args):
         domain, host, port, options = _args
-
+        
+        nmap_output = f"/tmp/_{Utils.random_string()}"
+        
         result = Utils.handle_command(
-            f"nmap -Pn {host} -p {port} {options}"
+            f"nmap -Pn {host} -p {port} {options} -oN {nmap_output}"
         )
 
-        _stdout = "\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\n"
+        #_stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
 
+        _stdout = result.stdout.decode("utf-8")
         
         f_host_domain = f" {host} ({domain}) "
 
@@ -58,8 +61,8 @@ class Modules:
             raise SystemExit
         
 
-        masscan_input = f"._{Utils.random_string()}.tmp"
-        masscan_output = f"._{Utils.random_string()}.tmp"
+        masscan_input = f"/tmp/_{Utils.random_string()}"
+        masscan_output = f"/tmp/_{Utils.random_string()}"
 
         with open(masscan_input, "a") as f:
             if len(resources.get_ips()) != 0:
@@ -174,7 +177,7 @@ class Modules:
         )
 
         for domain in resources.get_root_domains():
-            amass_output = f"._{Utils.random_string()}.tmp"
+            amass_output = f"/tmp/_{Utils.random_string()}"
 
             result = Utils.handle_command(
                 f"amass enum -d {domain} -ipv4 -v -json {amass_output}"
