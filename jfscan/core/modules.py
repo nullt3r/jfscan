@@ -22,9 +22,7 @@ class Modules:
             f"nmap -Pn {host} -p {port} {options} -oN {nmap_output}"
         )
 
-        #_stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
-
-        _stdout = result.stdout.decode("utf-8")
+        _stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
         
         f_host_domain = f" {host} ({domain}) "
 
