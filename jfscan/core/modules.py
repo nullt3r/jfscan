@@ -19,7 +19,7 @@ class Modules:
         nmap_output = f"/tmp/_{Utils.random_string()}"
         
         result = Utils.handle_command(
-            f"nmap -Pn {host} -p {port} {options} -oN {nmap_output}"
+            f"nmap --noninteractive -Pn {host} -p {port} {options} -oN {nmap_output}"
         )
 
         _stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
