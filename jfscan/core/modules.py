@@ -46,7 +46,7 @@ class Modules:
         """
         Fix terminal, somehow terminal gets broken after running nmap
         """
-        result = Utils.handle_command("stty sane")
+        os.system("stty sane")
 
 
     @staticmethod
