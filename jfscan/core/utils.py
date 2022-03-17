@@ -24,9 +24,8 @@ class Utils:
     \____/_/    /____/\___/\__,_/_/ /_/ 
                                         
     Just Fu*king Scan / version: 1.0.1 / author: nullt3r
-        
-        \033[0m"""
-        )
+\033[0m
+    """)
 
     @classmethod
     def check_dependency(cls, bin, version_flag = None, version_string = None):
