@@ -16,15 +16,15 @@ class Utils:
     @staticmethod
     def print_banner():
         print(
-            """\033[48;5;57m
+            """\033[38;5;63m
            _____________                
           / / ____/ ___/_________ _____ 
      __  / / /_   \__ \/ ___/ __ `/ __ \\
     / /_/ / __/  ___/ / /__/ /_/ / / / /
-    \____/_/    /____/\___/\__,_/_/ /_/ 
+    \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
                                         
-    Just Fu*king Scan / version: 1.0.1 / author: nullt3r
-\033[0m
+    \033[97mJust Fu*king Scan / version: 1.0.1 / author: nullt3r\033[0m
+
     """)
 
     @classmethod
