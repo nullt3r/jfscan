@@ -16,7 +16,7 @@ class Utils:
     @staticmethod
     def print_banner():
         print(
-            """
+            """\033[94m
            _____________                
           / / ____/ ___/_________ _____ 
      __  / / /_   \__ \/ ___/ __ `/ __ \\
@@ -25,7 +25,7 @@ class Utils:
                                         
     Just Fu*king Scan / version: 1.0.1 / author: nullt3r
         
-        """
+        \033[0m"""
         )
 
     @classmethod
