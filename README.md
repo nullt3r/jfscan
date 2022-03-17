@@ -2,7 +2,7 @@
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan)
 # Description
 ## Killing features
-* Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids. Please, when scanning less targets and ports just use nmap straight, its not efficient to use JFScan! `nmap -Pn -n --min-rate 1000 --max-rtt-timeout 1500ms -p 0-65535` (Rustscan did not saw the NMap documentation lol)
+* Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids.
 * Allows to scan targets in multiple formats.
 * Can output results in domain:port format.
 * Works in stdin/stdout mode, so you can pipe results to other tools.
