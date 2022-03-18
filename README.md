@@ -26,6 +26,7 @@ Please follow installation instructions before running. Do not run the JFScan un
 
 ```
 usage: jfscan [-h] [-t TARGETS] [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q] [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS]
+              [--nmap-output NMAP_OUTPUT]
 
 JFScan - Just Fu*king Scan
 
@@ -50,6 +51,8 @@ optional arguments:
                         nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --script ssh-auth-methods'
   --nmap-threads NMAP_THREADS
                         number of nmaps to run concurrently, default 8
+  --nmap-output NMAP_OUTPUT
+                        path to save output file in XML format (same as nmap option -oX)
 ```
 
 ## Example

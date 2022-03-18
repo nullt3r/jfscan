@@ -103,6 +103,12 @@ def main():
         help="number of nmaps to run concurrently, default 8",
     )
 
+    group_nmap.add_argument(
+        "--nmap-output",
+        action="store",
+        help="path to save output file in XML format (same as nmap option -oX)",
+    )
+
     args = parser.parse_args()
 
     arg_ports = args.ports
@@ -115,6 +121,7 @@ def main():
     arg_nmap = args.nmap
     arg_nmap_options = args.nmap_options
     arg_nmap_threads = args.nmap_threads
+    arg_nmap_output = args.nmap_output
 
     res = Resources()
 
@@ -161,7 +168,10 @@ def main():
         Modules.scan_masscan(res, *scan_masscan_args)
 
         if arg_nmap:
-            Modules.scan_nmap(res, arg_nmap_options, arg_nmap_threads)
+            if arg_nmap_output is not None:
+                Modules.scan_nmap(res, arg_nmap_options, arg_nmap_output, arg_nmap_threads)
+            else:
+                Modules.scan_nmap(res, arg_nmap_options, arg_nmap_threads)
 
     except KeyboardInterrupt:
         logging.fatal(" ctrl+c received, exiting")

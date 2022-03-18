@@ -23,7 +23,7 @@ class Utils:
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
                                         
-    \033[97mJust Fu*king Scan / version: 1.0.1 / author: nullt3r\033[0m
+    \033[97mJust Fu*king Scan / version: 1.0.2 / author: nullt3r\033[0m
 
     """)
 

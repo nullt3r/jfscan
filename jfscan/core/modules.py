@@ -14,13 +14,18 @@ from jfscan.core.utils import Utils
 class Modules:
     @staticmethod
     def _run_single_nmap(_args):
-        domain, host, port, options = _args
+        domain, host, port, options, output = _args
+
+        if output is not None:
+            _nmap_output = f"/tmp/_jfscan_{Utils.random_string()}.xml"
         
-        nmap_output = f"/tmp/_{Utils.random_string()}"
-        
-        result = Utils.handle_command(
-            f"nmap --noninteractive -Pn {host} -p {port} {options} -oN {nmap_output}"
-        )
+            result = Utils.handle_command(
+                f"nmap --noninteractive -Pn {host} -p {port} {options} -oX {_nmap_output}"
+            )
+        else:
+            result = Utils.handle_command(
+                f"nmap --noninteractive -Pn {host} -p {port} {options}"
+            )
 
         _stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
         
@@ -28,9 +33,12 @@ class Modules:
 
         print("-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + _stdout)
 
+        if output is not None:
+            return _nmap_output
+
 
     @classmethod
-    def scan_nmap(cls, resources, nmap_options, nmap_threads = 8):
+    def scan_nmap(cls, resources, nmap_options, nmap_output, nmap_threads = 8):
         logging.info("%s: scanning started\n", inspect.stack()[0][3])
 
         if len(resources.get_domains_ips_and_ports()) == 0:
@@ -40,8 +48,44 @@ class Modules:
             return
 
         processPool = multiprocessing.Pool(processes=nmap_threads)
-        run = processPool.map(cls._run_single_nmap, [t + (nmap_options, ) for t in resources.get_domains_ips_and_ports()])
+        run = processPool.map(cls._run_single_nmap, [t + (nmap_options, nmap_output) for t in resources.get_domains_ips_and_ports()])
         processPool.close()
+
+        if nmap_output is not None:
+            logging.info("%s: generating report %s", inspect.stack()[0][3], nmap_output)
+
+            host_report = []
+            on_first_run = 0
+
+            for xml_report in run:
+                with open(xml_report, "r") as thread_output:
+                    _reader = thread_output.readlines()
+
+                    if on_first_run == 0:
+                        extract_stylesheet =_reader[2].split('"')[1]
+                        on_first_run = 1
+
+                    host_report.append("".join(_reader[8:][:-3]))
+
+                    try:
+                        os.remove(xml_report)
+                    except:
+                        pass
+
+            report_header = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="{extract_stylesheet}" type="text/xsl"?>
+<nmaprun scanner="nmap" args="nmap --noninteractive -Pn -p port {nmap_options} host" start="" startstr="" version="" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="" services=""/>
+<verbose level="0"/>
+<debugging level="0"/>"""
+
+            report_end = f"""<runstats><finished time="" timestr="" summary="" elapsed="" exit="success"/><hosts up="" down="" total=""/>
+</runstats>
+</nmaprun>"""
+
+            with open(nmap_output, "w") as output:
+                output.write(report_header + "\n".join(host_report) + report_end)
 
 
     @staticmethod
@@ -60,8 +104,8 @@ class Modules:
             raise SystemExit
         
 
-        masscan_input = f"/tmp/_{Utils.random_string()}"
-        masscan_output = f"/tmp/_{Utils.random_string()}"
+        masscan_input = f"/tmp/_jfscan_{Utils.random_string()}"
+        masscan_output = f"/tmp/_jfscan_{Utils.random_string()}"
 
         with open(masscan_input, "a") as f:
             if len(resources.get_ips()) != 0:
@@ -176,7 +220,7 @@ class Modules:
         )
 
         for domain in resources.get_root_domains():
-            amass_output = f"/tmp/_{Utils.random_string()}"
+            amass_output = f"/tmp/_jfscan_{Utils.random_string()}"
 
             result = Utils.handle_command(
                 f"amass enum -d {domain} -ipv4 -v -json {amass_output}"
