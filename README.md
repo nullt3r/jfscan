@@ -1,5 +1,5 @@
 ![logo](screenshots/logo.png)
-![GitHub](https://img.shields.io/github/license/nullt3r/jfscan)
+![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan)
 # Description
 ## Killing features
 * Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids.
