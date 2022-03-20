@@ -16,7 +16,13 @@ class Modules:
     def _run_single_nmap(_args):
         domains, host, ports, options, output = _args
 
+        print(_args)
+
         if len(ports) == 0:
+            return
+
+        if len(ports) > 50:
+            logging.error("%s: host %s has %s of open ports, probably firewall messing with us - not scanning", inspect.stack()[0][3], host, len(ports))
             return
 
         ports = ",".join(map(str, ports))
