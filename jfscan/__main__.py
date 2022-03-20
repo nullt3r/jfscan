@@ -32,6 +32,12 @@ def main():
         required=is_tty,
     )
     parser.add_argument(
+        "--resolvers",
+        action="store",
+        help="custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1",
+        required=False,
+    )
+    parser.add_argument(
         "-m",
         "--modules",
         action="store",
@@ -112,6 +118,7 @@ def main():
     args = parser.parse_args()
 
     arg_ports = args.ports
+    arg_resolvers = args.resolvers
     arg_max_rate = args.max_rate
     arg_targets = args.targets
     arg_modules = args.modules
@@ -123,13 +130,30 @@ def main():
     arg_nmap_threads = args.nmap_threads
     arg_nmap_output = args.nmap_output
 
-    res = Resources()
-
     if args.quite:
         logging.getLogger().setLevel(logging.ERROR)
     else:
-        Utils.print_banner()
+        print(
+            """\033[38;5;63m
+           _____________                
+          / / ____/ ___/_________ _____ 
+     __  / / /_   \__ \/ ___/ __ `/ __ \\
+    / /_/ / __/  ___/ / /__/ /_/ / / / /
+    \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
+                                        
+    \033[97mJust Fu*king Scan / version: 1.0.3 / author: nullt3r\033[0m
+
+    """)
         logging.getLogger().setLevel(logging.INFO)
+
+    if arg_resolvers is not None:
+        logging.info(" using custom resolvers: %s", ", ".join(arg_resolvers.split(",")))
+        user_resolvers = arg_resolvers.split(",")
+        utils = Utils(resolvers = user_resolvers)
+    else:
+        utils = Utils()
+
+    res = Resources(utils)
 
     if arg_top_ports is not None:
         scan_masscan_args = (None, arg_max_rate, arg_top_ports)
@@ -146,7 +170,7 @@ def main():
             parser.error("--nmap requires argument --nmap-options.")
 
         if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
-            parser.error("output arguments -oNSXG are not permitted unfortunately, you can save the stdout for now")
+            parser.error("output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to single xml file (like -oX)")
 
         result = subprocess.run(
                 f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
@@ -160,11 +184,12 @@ def main():
             raise SystemExit
 
     try:
-        Utils.check_dependency("nmap", "--version", "Nmap version 7.")
-        Utils.check_dependency("masscan", "--version", "1.3.2")
+        utils.check_dependency("nmap", "--version", "Nmap version 7.")
+        utils.check_dependency("masscan", "--version", "1.3.2")
 
-        Utils.load_targets(res, arg_targets, is_tty)
-        Utils.load_modules(res, arg_modules)
+        utils.load_targets(res, arg_targets, is_tty)
+        utils.load_modules(res, arg_modules)
+
         Modules.scan_masscan(res, *scan_masscan_args)
 
         if arg_nmap:

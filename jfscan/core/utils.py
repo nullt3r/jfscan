@@ -12,20 +12,8 @@ import string
 
 
 class Utils:
-
-    @staticmethod
-    def print_banner():
-        print(
-            """\033[38;5;63m
-           _____________                
-          / / ____/ ___/_________ _____ 
-     __  / / /_   \__ \/ ___/ __ `/ __ \\
-    / /_/ / __/  ___/ / /__/ /_/ / / / /
-    \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
-                                        
-    \033[97mJust Fu*king Scan / version: 1.0.3 / author: nullt3r\033[0m
-
-    """)
+    def __init__(self, resolvers = None):
+        self.resolvers = resolvers
 
     @classmethod
     def check_dependency(cls, bin, version_flag = None, version_string = None):
@@ -77,14 +65,18 @@ class Utils:
             )
         return result
 
-    @staticmethod
-    def resolve_host(host):
+    def resolve_host(self, host):
+        resolver = dns.resolver.Resolver()
+
+        if self.resolvers is not None:
+            resolver.nameservers = self.resolvers
+
         ips = []
         try:
-            result = dns.resolver.resolve(host, "A")
+            result = resolver.query(host, "A")
         except:
-            logging.debug(
-                "%s: the host %s could not be resolved", inspect.stack()[0][3], host
+            logging.error(
+                "%s: the host %s could not be resolved, invalid resolver?", inspect.stack()[0][3], host
             )
             return None
         if result is not None and len(result) != 0:
@@ -93,7 +85,6 @@ class Utils:
             return list(set(ips))
         else:
             return None
-
 
     """
     Beta feature: Not tested, maybe it's not working as intended.

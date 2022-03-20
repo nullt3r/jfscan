@@ -10,9 +10,9 @@ import validators
 from jfscan.core.utils import Utils
 
 class Resources:
-    def __init__(self):
+    def __init__(self, utils):
         self.cidrs = []
-
+        self.utils = utils
         self.conn = None
 
         try:
@@ -46,7 +46,7 @@ class Resources:
 
 
     def add_domain(self, domain):
-        ips = Utils.resolve_host(domain)
+        ips = self.utils.resolve_host(domain)
   
         conn = self.conn
         cur = conn.cursor()
