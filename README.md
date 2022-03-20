@@ -2,7 +2,7 @@
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan)
 # Description
 ## Killing features
-* Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids.
+* Scan with nmap fast! Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids.
 * Allows to scan targets in multiple formats.
 * Can output results in domain:port format.
 * Works in stdin/stdout mode, so you can pipe results to other tools.
