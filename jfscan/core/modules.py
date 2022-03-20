@@ -208,9 +208,9 @@ class Modules:
 
                 if r.status_code == 502:
                     logging.error(
-                        "%s: there was an error while reaching the crt.sh, the server is down...", inspect.stack()[0][3]
+                        "%s: there was an error while reaching the crt.sh, the server is down... waiting", inspect.stack()[0][3]
                     )
-                    time.sleep(5)
+                    time.sleep(25)
                     continue
 
                 try:
@@ -229,9 +229,14 @@ class Modules:
             if results is None:
                 continue
 
+            results_subdomains = []
+            
             for subdomain in results:
-                if validators.domain(subdomain["name_value"]):
-                    resources.add_domain(subdomain["name_value"])
+                results_subdomains.append(subdomain["name_value"])
+
+            for subdomain in list(set(results_subdomains)):
+                if validators.domain(subdomain):
+                    resources.add_domain(subdomain)
 
     @staticmethod
     def enum_amass(resources):
