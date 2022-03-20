@@ -75,8 +75,8 @@ class Utils:
         try:
             result = resolver.query(host, "A")
         except:
-            logging.error(
-                "%s: the host %s could not be resolved, invalid resolver?", inspect.stack()[0][3], host
+            logging.warning(
+                "%s: the host %s could not be resolved by provided resolvers", inspect.stack()[0][3], host
             )
             return None
         if result is not None and len(result) != 0:
