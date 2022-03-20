@@ -229,7 +229,7 @@ class Modules:
             if results is None:
                 continue
 
-            for subdomain in results:
+            for subdomain in list(set(results)):
                 if validators.domain(subdomain["name_value"]):
                     resources.add_domain(subdomain["name_value"])
 

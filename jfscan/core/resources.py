@@ -101,7 +101,7 @@ class Resources:
         conn = self.conn
         cur = conn.cursor()
 
-        ips = cur.execute("SELECT ip FROM ips").fetchall()
+        ips = cur.execute("SELECT DISTINCT ip FROM ips").fetchall()
 
         return ips
 
@@ -109,7 +109,7 @@ class Resources:
         conn = self.conn
         cur = conn.cursor()
 
-        ips = cur.execute("SELECT ip FROM ips").fetchall()
+        ips = cur.execute("SELECT DISTINCT ip FROM ips").fetchall()
 
         results = []
 
@@ -134,7 +134,7 @@ class Resources:
         conn = self.conn
         cur = conn.cursor()
 
-        cidrs = cur.execute("SELECT cidr FROM cidrs").fetchall()
+        cidrs = cur.execute("SELECT DISTINCT cidr FROM cidrs").fetchall()
 
         return cidrs
 
@@ -161,7 +161,7 @@ class Resources:
 
         cur = conn.cursor()
 
-        domains = cur.execute("SELECT domain FROM domains").fetchall()
+        domains = cur.execute("SELECT DISTINCT domain FROM domains").fetchall()
 
         return domains
 
