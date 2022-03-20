@@ -16,8 +16,6 @@ class Modules:
     def _run_single_nmap(_args):
         domains, host, ports, options, output = _args
 
-        print(_args)
-
         if len(ports) == 0:
             return
 
