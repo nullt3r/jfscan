@@ -17,7 +17,7 @@ Finally, it can scan discovered ports with Nmap, you can also define custom opti
 ![logo](screenshots/for_dummies.png)
 
 # Usage
-![usage](screenshots/masscan_nmap.png)
+![usage](screenshots/advanced_usage.png)
 
 ![usage](screenshots/usage_example2.png)
 
@@ -25,8 +25,7 @@ Finally, it can scan discovered ports with Nmap, you can also define custom opti
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
-usage: jfscan [-h] [-t TARGETS] [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q] [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS]
-              [--nmap-output NMAP_OUTPUT]
+usage: jfscan [-h] -t TARGETS [--resolvers RESOLVERS] [-m MODULES] (-p PORTS | -tp TOP_PORTS) [-r MAX_RATE] [-oi] [-od] [-q] [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT]
 
 JFScan - Just Fu*king Scan
 
@@ -34,6 +33,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -t TARGETS, --targets TARGETS
                         list of targets, accepted form is: domain name, IPv4, IPv6, URL
+  --resolvers RESOLVERS
+                        custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1
   -m MODULES, --modules MODULES
                         modules separated by a comma, available modules: enum_amass, enum_crtsh
   -p PORTS, --ports PORTS
