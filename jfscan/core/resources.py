@@ -154,7 +154,7 @@ class Resources:
 
             root_domains.append(parse)
 
-        return root_domains
+        return list(set(root_domains))
 
     def get_all_domains(self):
         conn = self.conn
