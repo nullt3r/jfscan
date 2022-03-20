@@ -59,20 +59,17 @@ class Resources:
             return
 
         for ip in ips:
-            query = "INSERT OR IGNORE INTO ips(ip, version) VALUES(?, ?)"
+            insert_ip = "INSERT OR IGNORE INTO ips(ip, version) VALUES(?, ?)"
 
             if validators.ipv4(ip):
-                cur.execute(query, (ip, 4))
-                ip_rowid = cur.lastrowid
+                cur.execute(insert_ip, (ip, 4))
             elif validators.ipv6(ip):
-                cur.execute(query, (ip, 6))
-                ip_rowid = cur.lastrowid
+                cur.execute(insert_ip, (ip, 6))
             else:
                 continue
 
-            query = "INSERT OR IGNORE INTO domains(domain, ip_rowid) VALUES(?, ?)"
- 
-            cur.execute(query, (domain, ip_rowid))
+            cur.execute("INSERT OR IGNORE INTO domains(domain, ip_rowid) VALUES(?, (SELECT rowid FROM ips where ip = ?))", (domain, ip))
+
 
         conn.commit()
 
