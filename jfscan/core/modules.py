@@ -14,41 +14,62 @@ from jfscan.core.utils import Utils
 class Modules:
     @staticmethod
     def _run_single_nmap(_args):
-        domain, host, port, options, output = _args
+        domains, host, ports, options, output = _args
+
+        if len(ports) == 0:
+            return
+
+        ports = ",".join(map(str, ports))
 
         if output is not None:
             _nmap_output = f"/tmp/_jfscan_{Utils.random_string()}.xml"
-        
             result = Utils.handle_command(
-                f"nmap --noninteractive -Pn {host} -p {port} {options} -oX {_nmap_output}"
+                f"nmap --noninteractive -Pn {host} -p {ports} {options} -oX {_nmap_output}"
             )
         else:
             result = Utils.handle_command(
-                f"nmap --noninteractive -Pn {host} -p {port} {options}"
+                f"nmap --noninteractive -Pn {host} -p {ports} {options}"
             )
 
-        _stdout = "\r\n".join(result.stdout.decode("utf-8").splitlines()[3:][:-2]) + "\r\n"
-        
-        f_host_domain = f" {host} ({domain}) "
+        _stdout = result.stdout.decode("utf-8")
 
-        print("-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + _stdout)
+        if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
+            logging.error("%s: host %s seems down, your network connection is not able to handle the scanning, are you on WiFi?", inspect.stack()[0][3], host)
+        else:
+            _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
+
+            if len(domains) == 0:
+                f_host_domain = f" {host} "
+            else:
+                f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
+            
+            output_in_colors =  _stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
+            output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
+            output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
+
+            print("-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + _stdout.replace(" open ", "\033[1m\033[92m open \033[0m"))
 
         if output is not None:
-            return _nmap_output
+            if Utils.file_is_empty(_nmap_output):
+                return None
+            else:
+                return _nmap_output
 
 
     @classmethod
-    def scan_nmap(cls, resources, nmap_options, nmap_output, nmap_threads = 8):
+    def scan_nmap(cls, resources, nmap_options, nmap_output = None, nmap_threads = 8):
         logging.info("%s: scanning started\n", inspect.stack()[0][3])
 
-        if len(resources.get_domains_ips_and_ports()) == 0:
+        nmap_input = resources.get_domains_ips_and_ports()
+
+        if len(nmap_input) == 0:
             logging.error(
                 "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
             )
             return
 
         processPool = multiprocessing.Pool(processes=nmap_threads)
-        run = processPool.map(cls._run_single_nmap, [t + (nmap_options, nmap_output) for t in resources.get_domains_ips_and_ports()])
+        run = processPool.map(cls._run_single_nmap, [target + (nmap_options, nmap_output) for target in nmap_input])
         processPool.close()
 
         if nmap_output is not None:
@@ -58,6 +79,8 @@ class Modules:
             on_first_run = 0
 
             for xml_report in run:
+                if xml_report is None:
+                    continue
                 with open(xml_report, "r") as thread_output:
                     _reader = thread_output.readlines()
 
@@ -97,7 +120,10 @@ class Modules:
         """
         logging.info("%s: port scanning started", inspect.stack()[0][3])
 
-        if len(resources.get_ips()) == 0 and len(resources.get_cidrs()) == 0:
+        ips = resources.get_ips()
+        cidrs = resources.get_cidrs()
+
+        if len(ips) == 0 and len(cidrs) == 0:
             logging.error(
                 "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
             )
@@ -108,12 +134,12 @@ class Modules:
         masscan_output = f"/tmp/_jfscan_{Utils.random_string()}"
 
         with open(masscan_input, "a") as f:
-            if len(resources.get_ips()) != 0:
-                for ip in resources.get_ips():
+            if len(ips) != 0:
+                for ip, in ips:
                     f.write(f"{ip}\n")
 
-            if len(resources.get_cidrs()) != 0:
-                for cidr in resources.get_cidrs():
+            if len(cidrs) != 0:
+                for cidr, in cidrs:
                     f.write(f"{cidr}\n")
 
         if top_ports is not None:
@@ -143,7 +169,7 @@ class Modules:
 
         for r in masscan_results:
             for port in r["ports"]:
-                resources.add_port(r["ip"], port["port"])
+                resources.add_port(r["ip"], port["port"], port["proto"])
 
         try:
             os.remove(masscan_input)

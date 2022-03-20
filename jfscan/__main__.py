@@ -171,7 +171,7 @@ def main():
             if arg_nmap_output is not None:
                 Modules.scan_nmap(res, arg_nmap_options, arg_nmap_output, arg_nmap_threads)
             else:
-                Modules.scan_nmap(res, arg_nmap_options, arg_nmap_threads)
+                Modules.scan_nmap(res, arg_nmap_options, None)
 
     except KeyboardInterrupt:
         logging.fatal(" ctrl+c received, exiting")
@@ -191,7 +191,7 @@ def main():
         else:
             results = res.get_list(ips=True, domains=True)
 
-        for line in sorted(results):
+        for line in results:
             print(line)
 
 if __name__ == "__main__":
