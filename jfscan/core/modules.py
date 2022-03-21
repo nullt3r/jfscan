@@ -19,7 +19,7 @@ class Modules:
         if len(ports) == 0:
             return
 
-        if len(ports) > 50:
+        if len(ports) > 250:
             logging.error("%s: host %s has %s of open ports, probably firewall messing with us - not scanning", inspect.stack()[0][3], host, len(ports))
             return
 
@@ -51,7 +51,7 @@ class Modules:
             output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
             output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-            print("\033[7m-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\033[0m\n" + _stdout.replace(" open ", "\033[1m\033[92m open \033[0m"))
+            print("\033[1m-------" + f_host_domain +  "".join(["-" for s in range(94 - len(f_host_domain))]) + "\033[0m\n" + _stdout.replace(" open ", "\033[1m\033[92m open \033[0m"))
 
         if output is not None:
             if Utils.file_is_empty(_nmap_output):
