@@ -136,7 +136,7 @@ def main():
         print(
             """\033[38;5;63m
            _____________                
-          / / ____/ ___/_________ _____ 
+          / / ____/ ___/_________  _____ 
      __  / / /_   \__ \/ ___/ __ `/ __ \\
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
@@ -166,22 +166,20 @@ def main():
 
 
     if arg_nmap:
-        if arg_nmap_options is None:
-            parser.error("--nmap requires argument --nmap-options.")
+        if arg_nmap_options is not None:
+            if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
+                parser.error("output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to single xml file (like -oX)")
 
-        if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
-            parser.error("output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to single xml file (like -oX)")
+            result = subprocess.run(
+                    f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
+                    capture_output=True,
+                    shell=True,
+                    check=False,
+                )
 
-        result = subprocess.run(
-                f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
-                capture_output=True,
-                shell=True,
-                check=False,
-            )
-
-        if result.returncode != 0:
-            logging.fatal(" incorrect nmap options: \n\n%s", result.stderr.decode("UTF-8"))
-            raise SystemExit
+            if result.returncode != 0:
+                logging.fatal(" incorrect nmap options: \n\n%s", result.stderr.decode("UTF-8"))
+                raise SystemExit
 
     try:
         utils.check_dependency("nmap", "--version", "Nmap version 7.")
