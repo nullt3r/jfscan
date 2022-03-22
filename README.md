@@ -32,7 +32,7 @@ JFScan - Just Fu*king Scan
 optional arguments:
   -h, --help            show this help message and exit
   -t TARGETS, --targets TARGETS
-                        file containing a list of targets, accepted form is: domain name, IPv4, IPv6, URL
+                        list of targets, accepted form is: domain name, IPv4, IPv6, URL
   --resolvers RESOLVERS
                         custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1
   -m MODULES, --modules MODULES
@@ -43,6 +43,8 @@ optional arguments:
                         scan only N of the top ports, e. g., --top-ports 1000
   -r MAX_RATE, --max-rate MAX_RATE
                         max kpps rate
+  -i INTERFACE, --interface INTERFACE
+                        interface for masscan and nmap to use
   -oi, --only-ips       output only IP adresses, default: all resources
   -od, --only-domains   output only domains, default: all resources
   -q, --quite           output only results
