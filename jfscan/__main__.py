@@ -141,10 +141,11 @@ def main():
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
                                         
-    \033[97mJust Fu*king Scan / version: 1.0.3 / author: nullt3r\033[0m
+    \033[97mJust Fu*king Scan / version: 1.1.3 / author: @nullt3r\033[0m
 
     """)
-        logging.getLogger().setLevel(logging.INFO)
+
+    logging.getLogger().setLevel(logging.INFO)
 
     if arg_resolvers is not None:
         logging.info(" using custom resolvers: %s", ", ".join(arg_resolvers.split(",")))
