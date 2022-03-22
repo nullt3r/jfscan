@@ -12,7 +12,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="jfscan",
-    version="1.3.4",
+    version="1.1.4",
     description="A Masscan wrapper with some useful modules. I am not responsible for any damages. You are responsible for your own actions. Attacking targets without prior mutual consent is illegal.",
     long_description=README,
     long_description_content_type="text/markdown",
