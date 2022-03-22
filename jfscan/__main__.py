@@ -69,6 +69,13 @@ def main():
         required=False,
     )
     parser.add_argument(
+        "-i",
+        "--interface",
+        action="store",
+        help="interface for masscan and nmap to use",
+        required=False,
+    )
+    parser.add_argument(
         "-oi",
         "--only-ips",
         action="store_true",
@@ -120,6 +127,7 @@ def main():
     arg_ports = args.ports
     arg_resolvers = args.resolvers
     arg_max_rate = args.max_rate
+    arg_interface = args.interface
     arg_targets = args.targets
     arg_modules = args.modules
     arg_only_domains = args.only_domains
@@ -141,7 +149,7 @@ def main():
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
                                         
-    \033[97mJust Fu*king Scan / version: 1.1.3 / author: @nullt3r\033[0m
+    \033[97mJust Fu*king Scan / version: 1.1.4 / author: @nullt3r\033[0m
 
     """)
 
@@ -157,13 +165,13 @@ def main():
     res = Resources(utils)
 
     if arg_top_ports is not None:
-        scan_masscan_args = (None, arg_max_rate, arg_top_ports)
+        scan_masscan_args = (None, arg_max_rate, arg_top_ports, arg_interface)
     else:
         port_chars = re.compile(r"^[0-9,\-]+$")
         if not re.search(port_chars, arg_ports):
             logging.fatal(" ports are in a wrong format")
             raise SystemExit
-        scan_masscan_args = (arg_ports, arg_max_rate, None)
+        scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface)
 
 
     if arg_nmap:
@@ -193,7 +201,7 @@ def main():
 
         if arg_nmap:
             if arg_nmap_output is not None:
-                Modules.scan_nmap(res, arg_nmap_options, arg_nmap_output, arg_nmap_threads)
+                Modules.scan_nmap(res, arg_nmap_options, arg_interface, arg_nmap_output, arg_nmap_threads)
             else:
                 Modules.scan_nmap(res, arg_nmap_options, None)
 

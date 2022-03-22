@@ -14,7 +14,7 @@ from jfscan.core.utils import Utils
 class Modules:
     @staticmethod
     def _run_single_nmap(_args):
-        domains, host, ports, options, output = _args
+        domains, host, ports, options, output, interface = _args
 
         if len(ports) == 0:
             return
@@ -28,12 +28,18 @@ class Modules:
         if output is not None:
             _nmap_output = f"/tmp/_jfscan_{Utils.random_string()}.xml"
             result = Utils.handle_command(
-                f"nmap --noninteractive -Pn {host} -p {ports} {options} -oX {_nmap_output}"
+                f"nmap {'-e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options} -oX {_nmap_output}"
             )
         else:
             result = Utils.handle_command(
-                f"nmap --noninteractive -Pn {host} -p {ports} {options}"
+                f"nmap {'-e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options}"
             )
+
+        if "I cannot figure out what source address to use for device" in result.stderr.decode("utf-8"):
+            logging.error(
+                "%s: interface does not exists or can't be used for scanning", inspect.stack()[0][3]
+            )
+            raise SystemExit
 
         _stdout = result.stdout.decode("utf-8")
 
@@ -61,7 +67,7 @@ class Modules:
 
 
     @classmethod
-    def scan_nmap(cls, resources, nmap_options, nmap_output = None, nmap_threads = 8):
+    def scan_nmap(cls, resources, nmap_options, interface = None, nmap_output = None, nmap_threads = 8):
         logging.info("%s: scanning started\n", inspect.stack()[0][3])
 
         nmap_input = resources.get_domains_ips_and_ports()
@@ -73,7 +79,7 @@ class Modules:
             return
 
         processPool = multiprocessing.Pool(processes=nmap_threads)
-        run = processPool.map(cls._run_single_nmap, [target + (nmap_options, nmap_output) for target in nmap_input])
+        run = processPool.map(cls._run_single_nmap, [target + (nmap_options, interface, nmap_output) for target in nmap_input])
         processPool.close()
 
         if nmap_output is not None:
@@ -116,7 +122,7 @@ class Modules:
 
 
     @staticmethod
-    def scan_masscan(resources, ports, max_rate=30000, top_ports = None):
+    def scan_masscan(resources, ports, max_rate=30000, top_ports = None, interface = None):
         """
         Description: Native module for identification of open ports, uses Masscan
         Author: nullt3r
@@ -146,14 +152,25 @@ class Modules:
                 for cidr, in cidrs:
                     f.write(f"{cidr}\n")
 
-        if top_ports is not None:
-            result = Utils.handle_command(
-                f"masscan --open --top-ports {top_ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+        result = Utils.handle_command(
+            f"masscan {'--interface ' + interface if interface is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+        )
+
+        if "FAIL: could not determine default interface" in result.stderr.decode('utf-8'):
+            logging.error(
+                "%s: could not determine default interface, specify it using --interface <interface for scanning>",
+                inspect.stack()[0][3],
             )
-        else:
-            result = Utils.handle_command(
-                f"masscan --open -p {ports} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+
+            raise SystemExit
+
+        if "BIOCSETIF failed: Device not configured" in result.stderr.decode('utf-8'):
+            logging.error(
+                "%s: interface does not exists or can't be used for scanning",
+                inspect.stack()[0][3],
             )
+
+            raise SystemExit
 
         if Utils.file_is_empty(masscan_output):
             logging.error(

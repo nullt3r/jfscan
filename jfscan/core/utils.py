@@ -46,23 +46,23 @@ class Utils:
     @staticmethod
     def handle_command(cmd):
         result = None
-        try:
-            logging.debug("%s: running command %s", inspect.stack()[0][3], cmd)
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                shell=True,
-                check=True,
-            )
+        logging.debug("%s: running command %s", inspect.stack()[0][3], cmd)
 
-        except subprocess.CalledProcessError as e:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            shell=True,
+            check=False,
+        )
+
+        if result.returncode != 0:
             logging.error(
-                "%s: there was an exception while running command %s: %s",
+                "%s: there was an exception while running command:\n %s",
                 inspect.stack()[0][3],
-                cmd,
-                e,
+                cmd
             )
+        
         return result
 
     def resolve_host(self, host):
