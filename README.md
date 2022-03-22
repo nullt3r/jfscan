@@ -13,15 +13,13 @@ The JFScan also allows you to output only the results and chain it with other to
 
 Finally, it can scan discovered ports with Nmap, you can also define custom options and use Nmaps amazing scripting capabilities.
 
-## Diagram
-![logo](screenshots/for_dummies.png)
+![nmap](screenshots/nmap_scan.png)
+![diagram](screenshots/for_dummies.png)
 
 # Usage
-![usage](screenshots/advanced_usage.png)
+![usage1](screenshots/usage_example2.png)
 
-![usage](screenshots/usage_example2.png)
-
-![usage](screenshots/usage_example.png)
+![usage2](screenshots/usage_example.png)
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
 ```
