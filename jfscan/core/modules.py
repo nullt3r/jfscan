@@ -47,12 +47,9 @@ class Modules:
             else:
                 f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
             
-            output_in_colors =  _stdout.replace("/tcp open ", "/tcp\033[1m\033[92m open \033[0m")
-            output_in_colors =  output_in_colors.replace("/tcp  open ", "/tcp \033[1m\033[92m open \033[0m")
-            output_in_colors =  output_in_colors.replace("/tcp filtered ", "/tcp\033[1m\033[93m filtered \033[0m")
-            output_in_colors =  output_in_colors.replace("/tcp closed ", "/tcp\033[1m\033[91m closed \033[0m")
-            output_in_colors =  output_in_colors.replace("/tcp  filtered ", "/tcp \033[1m\033[93m filtered \033[0m")
-            output_in_colors =  output_in_colors.replace("/tcp  closed ", "/tcp \033[1m\033[91m closed \033[0m")
+            output_in_colors =  _stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
+            output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
+            output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
             print("-------\033[1m" + f_host_domain + "\033[0m" + "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + output_in_colors)
 
