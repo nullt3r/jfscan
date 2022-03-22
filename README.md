@@ -14,6 +14,8 @@ The JFScan also allows you to output only the results and chain it with other to
 Finally, it can scan discovered ports with Nmap, you can also define custom options and use Nmaps amazing scripting capabilities.
 
 ![nmap](screenshots/nmap_scan.png)
+
+JFScans logic of input & output processing:
 ![diagram](screenshots/for_dummies.png)
 
 # Usage
