@@ -32,7 +32,7 @@ JFScan - Just Fu*king Scan
 optional arguments:
   -h, --help            show this help message and exit
   -t TARGETS, --targets TARGETS
-                        list of targets, accepted form is: domain name, IPv4, IPv6, URL
+                        file containing a list of targets, accepted form is: domain name, IPv4, IPv6, URL
   --resolvers RESOLVERS
                         custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1
   -m MODULES, --modules MODULES
