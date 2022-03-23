@@ -4,7 +4,7 @@ import argparse
 import sys
 import re
 import subprocess
-import os
+import validators
 
 from jfscan.core.resources import Resources
 from jfscan.core.utils import Utils
@@ -76,6 +76,12 @@ def main():
         required=False,
     )
     parser.add_argument(
+        "--router-ip",
+        action="store",
+        help="IP address of your router for the masscan, e. g., when scanning from Nethunter/Android",
+        required=False,
+    )
+    parser.add_argument(
         "-oi",
         "--only-ips",
         action="store_true",
@@ -128,6 +134,7 @@ def main():
     arg_resolvers = args.resolvers
     arg_max_rate = args.max_rate
     arg_interface = args.interface
+    arg_router_ip = args.router_ip
     arg_targets = args.targets
     arg_modules = args.modules
     arg_only_domains = args.only_domains
@@ -164,14 +171,19 @@ def main():
 
     res = Resources(utils)
 
+    if arg_router_ip is not None:
+        if validators.ipv4(arg_router_ip) != True:
+            parser.error("--router-ip has to be an IP addresses")
+            raise SystemExit
+
     if arg_top_ports is not None:
-        scan_masscan_args = (None, arg_max_rate, arg_top_ports, arg_interface)
+        scan_masscan_args = (None, arg_max_rate, arg_top_ports, arg_interface, arg_router_ip)
     else:
         port_chars = re.compile(r"^[0-9,\-]+$")
         if not re.search(port_chars, arg_ports):
             logging.fatal(" ports are in a wrong format")
             raise SystemExit
-        scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface)
+        scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface, arg_router_ip)
 
 
     if arg_nmap:

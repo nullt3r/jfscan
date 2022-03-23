@@ -128,7 +128,7 @@ class Modules:
 
 
     @staticmethod
-    def scan_masscan(resources, ports, max_rate=30000, top_ports = None, interface = None):
+    def scan_masscan(resources, ports, max_rate=30000, top_ports = None, interface = None, router_ip = None):
         """
         Description: Native module for identification of open ports, uses Masscan
         Author: nullt3r
@@ -159,7 +159,7 @@ class Modules:
                     f.write(f"{cidr}\n")
 
         result = Utils.handle_command(
-            f"masscan {'--interface ' + interface if interface is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+            f"masscan {'--interface ' + interface if interface is not None else ''} {'--router-ip ' + router_ip if router_ip is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
         )
 
         if "FAIL: could not determine default interface" in result.stderr.decode('utf-8'):
@@ -180,6 +180,12 @@ class Modules:
         if "FAIL: failed to detect IP of interface" in result.stderr.decode("utf-8"):
             logging.error(
                 "%s: interface %s has no IP address set", inspect.stack()[0][3], interface
+            )
+            raise SystemExit
+
+        if "FAIL: ARP timed-out resolving MAC address for router" in result.stderr.decode("utf-8"):
+            logging.error(
+                "%s: can't resolve MAC address for router, please specify --router-ip <IP of your router>", inspect.stack()[0][3], interface
             )
             raise SystemExit
 
