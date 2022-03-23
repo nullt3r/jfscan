@@ -41,6 +41,12 @@ class Modules:
             )
             raise SystemExit
 
+        if "Could not find interface" in result.stderr.decode("utf-8"):
+            logging.error(
+                "%s: interface does not exists or can't be used for scanning", inspect.stack()[0][3]
+            )
+            raise SystemExit
+
         _stdout = result.stdout.decode("utf-8")
 
         if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
