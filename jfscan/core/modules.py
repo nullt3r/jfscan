@@ -161,15 +161,20 @@ class Modules:
                 "%s: could not determine default interface, specify it using --interface <interface for scanning>",
                 inspect.stack()[0][3],
             )
-
             raise SystemExit
 
         if "BIOCSETIF failed: Device not configured" in result.stderr.decode('utf-8'):
             logging.error(
-                "%s: interface does not exists or can't be used for scanning",
+                "%s: interface %s does not exists or can't be used for scanning",
                 inspect.stack()[0][3],
+                interface
             )
+            raise SystemExit
 
+        if "FAIL: failed to detect IP of interface" in result.stderr.decode("utf-8"):
+            logging.error(
+                "%s: interface %s has no IP address set", inspect.stack()[0][3], interface
+            )
             raise SystemExit
 
         if Utils.file_is_empty(masscan_output):
