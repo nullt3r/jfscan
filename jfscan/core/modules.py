@@ -50,7 +50,7 @@ class Modules:
         _stdout = result.stdout.decode("utf-8")
 
         if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
-            logging.error("%s: host %s seems down, your network connection is not able to handle the scanning, are you on WiFi?", inspect.stack()[0][3], host)
+            logging.error("%s: host %s seems down now, your network connection is not able to handle the scanning, are you on WiFi?", inspect.stack()[0][3], host)
         else:
             _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
 
@@ -58,12 +58,19 @@ class Modules:
                 f_host_domain = f" {host} "
             else:
                 f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
+
+            terminal_columns = os.get_terminal_size().columns
+            
+            if terminal_columns < 93:
+                hyphen_count = terminal_columns - 7
+            else:
+                hyphen_count = 93
             
             output_in_colors =  _stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
             output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
             output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-            print("-------\033[1m" + f_host_domain + "\033[0m" + "".join(["-" for s in range(94 - len(f_host_domain))]) + "\n" + output_in_colors)
+            print("-------\033[1m" + f_host_domain + "\033[0m" + "".join(["-" for s in range(hyphen_count - len(f_host_domain))]) + "\n" + output_in_colors)
 
         if output is not None:
             if Utils.file_is_empty(_nmap_output):
