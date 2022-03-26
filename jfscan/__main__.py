@@ -159,8 +159,7 @@ def main():
     \033[97mJust Fu*king Scan / version: 1.1.4 / author: @nullt3r\033[0m
 
     """)
-
-    logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(logging.INFO)
 
     if arg_resolvers is not None:
         logging.info(" using custom resolvers: %s", ", ".join(arg_resolvers.split(",")))
