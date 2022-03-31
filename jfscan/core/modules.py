@@ -14,7 +14,7 @@ from jfscan.core.utils import Utils
 class Modules:
     @staticmethod
     def _run_single_nmap(_args):
-        domains, host, ports, options, output, interface = _args
+        domains, host, ports, options, interface, output = _args
 
         if len(ports) == 0:
             return

@@ -214,7 +214,7 @@ def main():
             if arg_nmap_output is not None:
                 Modules.scan_nmap(res, arg_nmap_options, arg_interface, arg_nmap_output, arg_nmap_threads)
             else:
-                Modules.scan_nmap(res, arg_nmap_options, None)
+                Modules.scan_nmap(res, arg_nmap_options, arg_interface, None, arg_nmap_threads)
 
     except KeyboardInterrupt:
         logging.fatal(" ctrl+c received, exiting")
