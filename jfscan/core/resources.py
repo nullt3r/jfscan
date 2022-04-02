@@ -11,6 +11,7 @@ from jfscan.core.utils import Utils
 
 class Resources:
     def __init__(self, utils):
+        self.logger = logging.getLogger(__name__)
         self.cidrs = []
         self.utils = utils
         self.conn = None
@@ -18,7 +19,7 @@ class Resources:
         try:
             self.conn = sqlite3.connect(":memory:")
         except Exception as e:
-            logging.fatal("%s: %s could not create database", inspect.stack()[0][3], bin)
+            self.logger.fatal("%s could not create database", bin)
 
             raise SystemExit
 

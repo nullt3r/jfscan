@@ -10,47 +10,52 @@ import multiprocessing
 
 from jfscan.core.utils import Utils
 
-
 class Modules:
-    @staticmethod
-    def _run_single_nmap(_args):
+    def __init__(self, utils):
+        self.logger = logging.getLogger(__name__)
+        self.utils = utils
+
+    def _run_single_nmap(self, _args):
+        logger = self.logger
+        utils = self.utils
+
         domains, host, ports, options, interface, output = _args
 
         if len(ports) == 0:
             return
 
         if len(ports) > 250:
-            logging.error("%s: host %s has %s of open ports, probably firewall messing with us - not scanning", inspect.stack()[0][3], host, len(ports))
+            logger.error("host %s has %s of open ports, probably firewall messing with us - not scanning", host, len(ports))
             return
 
         ports = ",".join(map(str, ports))
 
         if output is not None:
-            _nmap_output = f"/tmp/_jfscan_{Utils.random_string()}.xml"
-            result = Utils.handle_command(
+            _nmap_output = f"/tmp/_jfscan_{utils.random_string()}.xml"
+            result = utils.handle_command(
                 f"nmap {'-e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options} -oX {_nmap_output}"
             )
         else:
-            result = Utils.handle_command(
+            result = utils.handle_command(
                 f"nmap {'-e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options}"
             )
 
         if "I cannot figure out what source address to use for device" in result.stderr.decode("utf-8"):
-            logging.error(
-                "%s: interface does not exists or can't be used for scanning", inspect.stack()[0][3]
+            logger.error(
+                "interface does not exists or can't be used for scanning"
             )
             raise SystemExit
 
         if "Could not find interface" in result.stderr.decode("utf-8"):
-            logging.error(
-                "%s: interface does not exists or can't be used for scanning", inspect.stack()[0][3]
+            logger.error(
+                "interface does not exists or can't be used for scanning"
             )
             raise SystemExit
 
         _stdout = result.stdout.decode("utf-8")
 
         if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
-            logging.error("%s: host %s seems down now, your network connection is not able to handle the scanning, are you on WiFi?", inspect.stack()[0][3], host)
+            logger.error("host %s seems down now, your network connection is not able to handle the scanning, are you on WiFi?", host)
         else:
             _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
 
@@ -73,30 +78,31 @@ class Modules:
             print("-------\033[1m" + f_host_domain + "\033[0m" + "".join(["-" for s in range(hyphen_count - len(f_host_domain))]) + "\n" + output_in_colors)
 
         if output is not None:
-            if Utils.file_is_empty(_nmap_output):
+            if utils.file_is_empty(_nmap_output):
                 return None
             else:
                 return _nmap_output
 
+    def scan_nmap(self, resources, nmap_options, interface = None, nmap_output = None, nmap_threads = 8):
+        logger = self.logger
 
-    @classmethod
-    def scan_nmap(cls, resources, nmap_options, interface = None, nmap_output = None, nmap_threads = 8):
-        logging.info("%s: scanning started\n", inspect.stack()[0][3])
+        logger.info("scanning started\n")
 
         nmap_input = resources.get_domains_ips_and_ports()
 
         if len(nmap_input) == 0:
-            logging.error(
-                "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
+            logger.error(
+                "no resources were given, nothing to scan"
             )
             return
 
         processPool = multiprocessing.Pool(processes=nmap_threads)
-        run = processPool.map(cls._run_single_nmap, [target + (nmap_options, interface, nmap_output) for target in nmap_input])
+        run = processPool.map(self._run_single_nmap, [target + (nmap_options, interface, nmap_output) for target in nmap_input])
         processPool.close()
 
+
         if nmap_output is not None:
-            logging.info("%s: generating report %s", inspect.stack()[0][3], nmap_output)
+            logger.info("generating report %s", nmap_output)
 
             host_report = []
             on_first_run = 0
@@ -134,27 +140,29 @@ class Modules:
                 output.write(report_header + "\n".join(host_report) + report_end)
 
 
-    @staticmethod
-    def scan_masscan(resources, ports, max_rate=30000, top_ports = None, interface = None, router_ip = None):
+    def scan_masscan(self, resources, ports, max_rate=30000, top_ports = None, interface = None, router_ip = None):
         """
         Description: Native module for identification of open ports, uses Masscan
         Author: nullt3r
 
         """
-        logging.info("%s: port scanning started", inspect.stack()[0][3])
+        logger = self.logger
+        utils = self.utils
+
+        logger.info("port scanning started")
 
         ips = resources.get_ips()
         cidrs = resources.get_cidrs()
 
         if len(ips) == 0 and len(cidrs) == 0:
-            logging.error(
-                "%s: no resources were given, nothing to scan", inspect.stack()[0][3]
+            logger.error(
+                "no resources were given, nothing to scan"
             )
             raise SystemExit
         
 
-        masscan_input = f"/tmp/_jfscan_{Utils.random_string()}"
-        masscan_output = f"/tmp/_jfscan_{Utils.random_string()}"
+        masscan_input = f"/tmp/_jfscan_{utils.random_string()}"
+        masscan_output = f"/tmp/_jfscan_{utils.random_string()}"
 
         with open(masscan_input, "a") as f:
             if len(ips) != 0:
@@ -165,41 +173,38 @@ class Modules:
                 for cidr, in cidrs:
                     f.write(f"{cidr}\n")
 
-        result = Utils.handle_command(
+        result = utils.handle_command(
             f"masscan {'--interface ' + interface if interface is not None else ''} {'--router-ip ' + router_ip if router_ip is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
         )
 
         if "FAIL: could not determine default interface" in result.stderr.decode('utf-8'):
-            logging.error(
-                "%s: could not determine default interface, specify it using --interface <interface for scanning>",
-                inspect.stack()[0][3],
+            logger.error(
+                "could not determine default interface, specify it using --interface <interface for scanning>"
             )
             raise SystemExit
 
         if "BIOCSETIF failed: Device not configured" in result.stderr.decode('utf-8'):
-            logging.error(
-                "%s: interface %s does not exists or can't be used for scanning",
-                inspect.stack()[0][3],
+            logger.error(
+                "interface %s does not exists or can't be used for scanning",
                 interface
             )
             raise SystemExit
 
         if "FAIL: failed to detect IP of interface" in result.stderr.decode("utf-8"):
-            logging.error(
-                "%s: interface %s has no IP address set", inspect.stack()[0][3], interface
+            logger.error(
+                "interface %s has no IP address set", interface
             )
             raise SystemExit
 
         if "FAIL: ARP timed-out resolving MAC address for router" in result.stderr.decode("utf-8"):
-            logging.error(
-                "%s: can't resolve MAC address for router, please specify --router-ip <IP of your router>", inspect.stack()[0][3], interface
+            logger.error(
+                "can't resolve MAC address for router, please specify --router-ip <IP of your router>", interface
             )
             raise SystemExit
 
-        if Utils.file_is_empty(masscan_output):
-            logging.error(
-                "%s: no output from masscan, something went wrong or no open ports were discovered",
-                inspect.stack()[0][3],
+        if utils.file_is_empty(masscan_output):
+            logger.error(
+                "no output from masscan, something went wrong or no open ports were discovered"
             )
             try:
                 os.remove(masscan_input)
@@ -222,17 +227,16 @@ class Modules:
         except:
             pass
 
-    @staticmethod
-    def enum_crtsh(resources):
+    def enum_crtsh(self, resources):
         """
         Description: User module for enumerating subdomains via crt.sh API
         Author: nullt3r
 
         """
+        logger = self.logger
 
-        logging.info(
-            "%s: running on:\n %s",
-            inspect.stack()[0][3],
+        logger.info(
+            "running on:\n %s",
             ", ".join(resources.get_root_domains()),
         )
         for domain in resources.get_root_domains():
@@ -242,14 +246,14 @@ class Modules:
                 try:
                     r = requests.get(f"https://crt.sh/?q=%25.{domain}&output=json")
                 except Exception as e:
-                    logging.error(
-                        "%s: there was an error while reaching the crt.sh: %s", inspect.stack()[0][3], e
+                    logger.error(
+                        "there was an error while reaching the crt.sh: %s", e
                     )
                     continue
 
                 if r.status_code == 502:
-                    logging.error(
-                        "%s: there was an error while reaching the crt.sh, the server is down... waiting", inspect.stack()[0][3]
+                    logger.error(
+                        "there was an error while reaching the crt.sh, the server is down... waiting"
                     )
                     time.sleep(25)
                     continue
@@ -257,8 +261,8 @@ class Modules:
                 try:
                     results = r.json()
                 except Exception as e:
-                    logging.error(
-                        "%s: can't decode JSON data from crt.sh, reason: %s", inspect.stack()[0][3], e
+                    logger.error(
+                        "can't decode JSON data from crt.sh, reason: %s", e
                     )
                     continue
 
@@ -279,32 +283,33 @@ class Modules:
                 if validators.domain(subdomain):
                     resources.add_domain(subdomain)
 
-    @staticmethod
-    def enum_amass(resources):
+
+    def enum_amass(self, resources):
         """
         Description: User module for enumerating subdomains using amass tool
         Author: nullt3r
 
         """
+        logger = self.logger
+        utils = self.utils
 
-        Utils.check_dependency("amass")
+        utils.check_dependency("amass")
 
-        logging.info(
-            "%s: running on:\n %s",
-            inspect.stack()[0][3],
+        logger.info(
+            "running on:\n %s",
             ", ".join(resources.get_root_domains()),
         )
 
         for domain in resources.get_root_domains():
-            amass_output = f"/tmp/_jfscan_{Utils.random_string()}"
+            amass_output = f"/tmp/_jfscan_{utils.random_string()}"
 
-            result = Utils.handle_command(
+            result = utils.handle_command(
                 f"amass enum -d {domain} -ipv4 -v -json {amass_output}"
             )
 
-            if Utils.file_is_empty(amass_output):
-                logging.error(
-                    "%s: no output from amass, something went wrong",
+            if utils.file_is_empty(amass_output):
+                logger.error(
+                    "no output from amass, something went wrong",
                     inspect.stack()[0][3],
                 )
                 try:
@@ -319,12 +324,6 @@ class Modules:
                     if output["name"] is not None and validators.domain(output["name"]):
                         resources.add_domain(output["name"])
 
-                    if (
-                        output["addresses"] is not None
-                        and len(output["addresses"]) != 0
-                    ):
-                        for address in output["addresses"]:
-                            resources.add_ip(address["ip"], output["name"])
             try:
                 os.remove(amass_output)
             except:

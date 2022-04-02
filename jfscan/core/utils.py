@@ -13,10 +13,12 @@ import string
 
 class Utils:
     def __init__(self, resolvers = None):
+        self.logger = logging.getLogger(__name__)
         self.resolvers = resolvers
 
-    @classmethod
-    def check_dependency(cls, bin, version_flag = None, version_string = None):
+    def check_dependency(self, bin, version_flag = None, version_string = None):
+        logger = self.logger
+
         result = subprocess.run(
                 f"which {bin}",
                 capture_output=True,
@@ -25,7 +27,7 @@ class Utils:
             )
 
         if result.returncode == 1:
-            logging.fatal("%s: %s is not installed", inspect.stack()[0][3], bin)
+            logger.fatal("%s is not installed", bin)
 
             raise SystemExit
 
@@ -39,15 +41,17 @@ class Utils:
             )
 
             if version_string not in str(result.stdout):
-                logging.fatal("%s: wrong version of %s is installed - version %s is required", inspect.stack()[0][3], bin, version_string)
+                logger.fatal("wrong version of %s is installed - version %s is required", bin, version_string)
 
                 raise SystemExit
 
-    @staticmethod
-    def handle_command(cmd):
+
+    def handle_command(self, cmd):
+        logger = self.logger
+
         result = None
 
-        logging.debug("%s: running command %s", inspect.stack()[0][3], cmd)
+        logger.debug("running command %s", cmd)
 
         result = subprocess.run(
             cmd,
@@ -57,15 +61,16 @@ class Utils:
         )
 
         if result.returncode != 0:
-            logging.error(
-                "%s: there was an exception while running command:\n %s",
-                inspect.stack()[0][3],
+            logger.error(
+                "there was an exception while running command:\n %s",
                 cmd
             )
         
         return result
 
     def resolve_host(self, host):
+        logger = self.logger
+
         resolver = dns.resolver.Resolver()
 
         if self.resolvers is not None:
@@ -75,8 +80,8 @@ class Utils:
         try:
             result = resolver.query(host, "A")
         except:
-            logging.warning(
-                "%s: the host %s could not be resolved by provided resolvers", inspect.stack()[0][3], host
+            logger.warning(
+                "the host %s could not be resolved by provided resolvers", host
             )
             return None
         if result is not None and len(result) != 0:
@@ -89,13 +94,12 @@ class Utils:
     """
     Beta feature: Not tested, maybe it's not working as intended.
     """
-    @classmethod
-    def detect_firewall(cls, host):
+    def detect_firewall(self, host):
         random_ports = random.sample(range(50000, 65535), 90)
         open_ports = []
 
         for port in random_ports:
-            if cls.is_port_open(host, port):
+            if self.is_port_open(host, port):
                 open_ports.append(port)
 
         if len(open_ports) > len(random_ports) / 10:
@@ -119,17 +123,17 @@ class Utils:
     """
     Not too efficient way.
     """
-    @classmethod
-    def load_targets(cls, res, targets = None, is_tty = True):
-        logging.info("%s: loading targets and resolving domain names (if any)", inspect.stack()[0][3])
+    def load_targets(self, res, targets = None, is_tty = True):
+        logger = self.logger
+
+        logger.info("loading targets and resolving domain names (if any)")
 
         if is_tty:
             if targets is None:
                 return
-            if cls.file_is_empty(targets):
-                logging.error(
-                    "%s: file is empty or does not exists: %s",
-                    inspect.stack()[0][3],
+            if self.file_is_empty(targets):
+                logger.error(
+                    "file is empty or does not exists: %s",
                     targets,
                 )
                 raise SystemExit
@@ -175,19 +179,6 @@ class Utils:
             return True
         else:
             return False
-
-    @staticmethod
-    def load_modules(res, modules):
-        if modules is None:
-            return
-
-        from jfscan.core.modules import Modules
-
-        for module in modules.split(","):
-            if module in modules:
-                logging.info("%s: starting module", module)
-                getattr(Modules, module)(res)
-                logging.info("%s: module finished", module)
 
     @staticmethod
     def random_string():
