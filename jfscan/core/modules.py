@@ -55,7 +55,7 @@ class Modules:
         _stdout = result.stdout.decode("utf-8")
 
         if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
-            logger.error("host %s seems down now, your network connection is not able to handle the scanning, are you on WiFi?", host)
+            logger.error("host %s seems down now, your network connection is not able to handle the scanning, are you scanning over a wifi?", host)
         else:
             _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
 
