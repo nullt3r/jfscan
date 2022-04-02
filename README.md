@@ -146,8 +146,4 @@ I am not responsible for any damages. You are responsible for your own
 actions. Attacking targets without prior mutual consent is illegal.
 
 # Known issues
-* Running enum_amass will take forever if there is more then 10 domains on the input.
-
-# TODO
-* Transfer Resources object to a database (SQLite). It's getting too complex.
-* Update logging, create new logging class for each usecase.
+* Running enum_amass will take forever if there is more then 10 domains on the input. Amass takes forever.
