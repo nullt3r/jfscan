@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import logging
-import inspect
 from operator import ipow
 from importlib_metadata import version
 import tldextract

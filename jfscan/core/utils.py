@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
 import logging
-import inspect
 import validators
 import os
 import sys

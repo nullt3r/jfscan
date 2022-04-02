@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import logging
-import inspect
 import json
 import validators
 import os
@@ -309,8 +308,7 @@ class Modules:
 
             if utils.file_is_empty(amass_output):
                 logger.error(
-                    "no output from amass, something went wrong",
-                    inspect.stack()[0][3],
+                    "no output from amass, something went wrong"
                 )
                 try:
                     os.remove(amass_output)
