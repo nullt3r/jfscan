@@ -2,7 +2,7 @@
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan)
 # Description
 ## Killing features
-* Scan with nmap fast! Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids.
+* Scan with nmap fast! Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids. *
 * Allows to scan targets in multiple formats.
 * Can output results in domain:port format.
 * Works in stdin/stdout mode, so you can pipe results to other tools.
@@ -146,4 +146,12 @@ I am not responsible for any damages. You are responsible for your own
 actions. Attacking targets without prior mutual consent is illegal.
 
 # Known issues
-* Running enum_amass will take forever if there is more then 10 domains on the input. Amass takes forever.
+* Running enum_amass will take forever if there is more then 10 domains on the input. Amass takes forever and sometimes fails... help me to resolve it :)
+
+___
+
+\* *When scanning smaller network ranges, you can just use nmap directly, there is no need to use JFScan. You can reach up to 70% of the speed of JFScan using the following options:*
+```
+nmap -Pn -n -v yourTargetNetwork/26 -p- --min-parallelism 64 --min-rate 20000 --min-hostgroup 64 --randomize-hosts -sS -sV
+```
+*As always, expect some false positivies/negatives.*
