@@ -5,6 +5,7 @@ import validators
 import os
 import time
 import requests
+import signal
 import multiprocessing
 
 from jfscan.core.utils import Utils
@@ -95,7 +96,9 @@ class Modules:
             )
             return
 
+
         processPool = multiprocessing.Pool(processes=nmap_threads)
+
         run = processPool.map(self._run_single_nmap, [target + (nmap_options, interface, nmap_output) for target in nmap_input])
         processPool.close()
 
@@ -202,8 +205,8 @@ class Modules:
             raise SystemExit
 
         if utils.file_is_empty(masscan_output):
-            logger.error(
-                "no output from masscan, something went wrong or no open ports were discovered"
+            logger.info(
+                "no open ports were discovered (maybe something went wrong with your connection?)"
             )
             try:
                 os.remove(masscan_input)
@@ -214,7 +217,11 @@ class Modules:
             raise SystemExit
 
         with open(masscan_output, "r") as masscan_results:
-            masscan_results = json.load(masscan_results)
+            try:
+                masscan_results = json.load(masscan_results)
+            except Exception as e:
+                logger.fatal("output from masscan is not readable, expected valid json (masscan's bug?):\n%s", e)
+                raise SystemExit
 
         for r in masscan_results:
             for port in r["ports"]:
