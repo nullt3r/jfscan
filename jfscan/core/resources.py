@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 import logging
-from operator import ipow
-from importlib_metadata import version
 import tldextract
 import sqlite3
 import validators
 
-from jfscan.core.utils import Utils
 
 class Resources:
     def __init__(self, utils):

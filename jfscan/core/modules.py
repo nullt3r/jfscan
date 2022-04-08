@@ -5,10 +5,7 @@ import validators
 import os
 import time
 import requests
-import signal
 import multiprocessing
-
-from jfscan.core.utils import Utils
 
 class Modules:
     def __init__(self, utils):
