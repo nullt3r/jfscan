@@ -148,6 +148,11 @@ class Modules:
         logger = self.logger
         utils = self.utils
 
+        if logging.INFO >= logging.root.level:
+            stream_output = True
+        else:
+            stream_output = False
+
         logger.info("port scanning started")
 
         ips = resources.get_ips()
@@ -158,7 +163,6 @@ class Modules:
                 "no resources were given, nothing to scan"
             )
             raise SystemExit
-        
 
         masscan_input = f"/tmp/_jfscan_{utils.random_string()}"
         masscan_output = f"/tmp/_jfscan_{utils.random_string()}"
@@ -173,7 +177,8 @@ class Modules:
                     f.write(f"{cidr}\n")
 
         result = utils.handle_command(
-            f"masscan {'--interface ' + interface if interface is not None else ''} {'--router-ip ' + router_ip if router_ip is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}"
+            f"masscan {'--interface ' + interface if interface is not None else ''} {'--router-ip ' + router_ip if router_ip is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {max_rate} -iL {masscan_input} -oJ {masscan_output}",
+            stream_output
         )
 
         if "FAIL: could not determine default interface" in result.stderr.decode('utf-8'):

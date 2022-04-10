@@ -8,6 +8,7 @@ import dns.resolver
 import socket
 import random
 import string
+import selectors
 
 
 class Utils:
@@ -45,27 +46,52 @@ class Utils:
                 raise SystemExit
 
 
-    def handle_command(self, cmd):
+    def handle_command(self, cmd, stream_output = False):
         logger = self.logger
-
-        result = None
 
         logger.debug("running command %s", cmd)
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            shell=True,
-            check=False,
-        )
-
-        if result.returncode != 0:
-            logger.error(
-                "there was an exception while running command:\n %s",
-                cmd
+        if stream_output == False:
+            process = subprocess.run(
+                cmd,
+                capture_output=True,
+                shell=True,
+                check=False,
             )
-        
-        return result
+            if process.returncode != 0:
+                logger.error(
+                    "there was an exception while running command:\n %s",
+                    cmd
+                )
+
+            return process
+
+        _stdout = b''
+        _stderr = b''
+
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        sel = selectors.DefaultSelector()
+        sel.register(process.stdout, selectors.EVENT_READ)
+        sel.register(process.stderr, selectors.EVENT_READ)
+
+        while True:
+            for key, _ in sel.select():
+                data = key.fileobj.read1()
+                if not data:
+                    returncode = process.poll()
+                    if returncode != 0:
+                        logger.error(
+                            "there was an exception while running command:\n %s",
+                            cmd
+                        )
+                    return subprocess.CompletedProcess(process.args, process.returncode, _stdout, _stderr)
+                if key.fileobj is process.stdout:
+                    print(data.decode(), end="")
+                    _stdout += data
+                else:
+                    print(data.decode(), end="", file=sys.stderr)
+                    _stderr += data
 
     def resolve_host(self, host):
         logger = self.logger
