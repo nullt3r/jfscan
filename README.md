@@ -1,5 +1,5 @@
 ![logo](screenshots/logo.png)
-![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan)
+![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan) ![Rating](https://img.shields.io/github/stars/nullt3r/jfscan?style=social)
 # Description
 ## Killing features
 * Perform a large-scale scans using Nmap! Allows you to use Masscan to scan targets and execute Nmap on detected ports with custom settings. Nmap on steroids. *
@@ -8,11 +8,12 @@
 * It runs in stdin/stdout mode, allowing you to stream results to other tools.
 * Can produce standard Nmap XML report.
 
-The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in variety of formats. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin.
+The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
 
-The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei. The domain:port output of JFScan is crucial if you want to discover vulnerabilities in web applications as virtual host decides which content will be served.
+The JFScan also allows you to output only the results and chain it with other tools like Nuclei. The domain:port output of JFScan is crucial if you want to discover vulnerabilities in web applications as the virtual host decides which content will be served.
 
-Finally, it can scan discovered ports with Nmap, you can also define custom options and use Nmaps amazing scripting capabilities.
+Finally, it can scan discovered ports with Nmap. You can also define custom options and use Nmap's amazing scripting capabilities.
+
 
 ![nmap](screenshots/nmap_scan.png)
 
