@@ -2,12 +2,13 @@
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan)
 # Description
 ## Killing features
-* Scan with nmap fast! Allows you to scan targets with Masscan and run Nmap on discovered ports with possibility of custom options. Nmap on steroids. *
-* Allows to scan targets in multiple formats.
-* Can output results in domain:port format.
-* Works in stdin/stdout mode, so you can pipe results to other tools.
+* Perform a large-scale scans using Nmap! Allows you to use Masscan to scan targets and execute Nmap on detected ports with custom settings. Nmap on steroids. *
+* Scans targets in variety of formats.
+* Results can be produced in domain:port format.
+* It runs in stdin/stdout mode, allowing you to stream results to other tools.
+* Can produce standard Nmap XML report.
 
-The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in mixed formats, inluding domain names. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin.
+The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in variety of formats. Some useful modules are included, such as modules for subdomain enumeration using Amass and crt.sh. The JFScan accepts a target in the following forms: URL, domain or IP (including CIDR). You can specify a file with targets using argument or just use stdin.
 
 The JFScan also allows you to output only the results and chain it with other tools, for example Nuclei. The domain:port output of JFScan is crucial if you want to discover vulnerabilities in web applications as virtual host decides which content will be served.
 
