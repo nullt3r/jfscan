@@ -148,51 +148,62 @@ class Utils:
     """
     Not too efficient way.
     """
-    def load_targets(self, res, targets = None, is_tty = True):
+    def load_targets(self, res, targets_file = None, target = None):
         logger = self.logger
+        targets = []
 
         logger.info("loading targets and resolving domain names (if any)")
 
-        if is_tty:
-            if targets is None:
-                return
-            if self.file_is_empty(targets):
+        if targets_file is not None:
+            if self.file_is_empty(targets_file):
                 logger.error(
                     "file is empty or does not exists: %s",
-                    targets,
+                    targets_file,
                 )
                 raise SystemExit
 
-            _file = open(targets, "r")
-            _reader = _file.readlines()
-        else:
-            _reader = sys.stdin.readlines()
+            _file = open(targets_file, "r")
+            targets += _file.readlines()
+            _file.close()
+
+        if target is not None:
+            targets.append(target)
+
+        if sys.stdin.isatty() == False:
+            logger.info(
+                "reading input from stdin"
+            )
+            targets += sys.stdin.readlines()
+        
+        if len(targets) == 0:
+            logger.error(
+                "no valid targets were specified"
+            )
+            raise SystemExit
 
         target_before = None
 
-        for target in _reader:
+        for _target in targets:
 
-            if validators.url(target):
-                target = target.split("/")[2]
+            if validators.url(_target):
+                _target = _target.split("/")[2]
 
-            if target == target_before:
+            if _target == target_before:
                 continue
 
-            target = target.strip()
+            _target = _target.strip()
 
-            if validators.domain(target):
-                res.add_domain(target)
+            if validators.domain(_target):
+                res.add_domain(_target)
 
-            elif validators.ipv4(target) or validators.ipv6(target):
-                res.add_ip(target)
+            elif validators.ipv4(_target) or validators.ipv6(_target):
+                res.add_ip(_target)
 
-            elif validators.ipv4_cidr(target) or validators.ipv6_cidr(target):
-                res.add_cidr(target)
+            elif validators.ipv4_cidr(_target) or validators.ipv6_cidr(_target):
+                res.add_cidr(_target)
 
-            target_before = target
-        
-        if is_tty:
-            _file.close()
+            target_before = _target
+
         
 
     @staticmethod
@@ -210,3 +221,7 @@ class Utils:
         return "".join(
             random.choice(string.ascii_lowercase + string.digits) for _ in range(9)
         )
+    
+    @staticmethod
+    def yummy_ports():
+        return [22,21,23,80,443,389,636,8443,9443,8088,9088,8081,9081,8090,8983,8161,8009,6066,7077,9998,3306,1433,6379,5984,27017,27018,27019,5000,9010,9999,9998,8855,1099,5044,9600,9700,9200,9300,5601,10080,10443,3000,3322,8086,4712,4560,8834,3343,8080,8081,7990,7999,5701,7992,7993,4848,8080,5900,5901,111,2049,1110,4045,135,139,445]

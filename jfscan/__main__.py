@@ -23,33 +23,27 @@ def main():
     
     group_ports = parser.add_mutually_exclusive_group(required=True)
     group_nmap = parser.add_argument_group()
-
-    available_modules = [method for method in dir(Modules) if method.startswith("enum_") is True]
+    group_targets = parser.add_argument_group()
+    group_output = parser.add_argument_group()
+    group_scan_settings = parser.add_argument_group()
+    group_version = parser.add_argument_group()
 
     if sys.stdin.isatty():
         is_tty = True
     else:
         is_tty = False
-        logger.info(" accepting input from stdin")
 
-    parser.add_argument(
-        "-t",
+
+    group_targets.add_argument(
+        "target",
+        action="store",
+        help="a target, accepted form is: domain name, IPv4, IPv6, URL",
+        nargs='?',
+    )
+    group_targets.add_argument(
         "--targets",
         action="store",
-        help="list of targets, accepted form is: domain name, IPv4, IPv6, URL",
-        required=is_tty,
-    )
-    parser.add_argument(
-        "--resolvers",
-        action="store",
-        help="custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1",
-        required=False,
-    )
-    parser.add_argument(
-        "-m",
-        "--modules",
-        action="store",
-        help=f"modules separated by a comma, available modules: {', '.join(available_modules)}",
+        help="file with targets, accepted form is: domain name, IPv4, IPv6, URL",
         required=False,
     )
     group_ports.add_argument(
@@ -60,14 +54,25 @@ def main():
         required=False,
     )
     group_ports.add_argument(
-        "-tp",
         "--top-ports",
         action="store",
         type=int,
         help="scan only N of the top ports, e. g., --top-ports 1000",
         required=False,
     )
-    parser.add_argument(
+    group_ports.add_argument(
+        "--yummy-ports",
+        action="store_true",
+        help="scan only for the most yummy ports",
+        required=False,
+    )
+    group_scan_settings.add_argument(
+        "--resolvers",
+        action="store",
+        help="custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1",
+        required=False,
+    )
+    group_scan_settings.add_argument(
         "-r",
         "--max-rate",
         action="store",
@@ -76,44 +81,39 @@ def main():
         help="max kpps rate",
         required=False,
     )
-    parser.add_argument(
+    group_scan_settings.add_argument(
         "-i",
         "--interface",
         action="store",
         help="interface for masscan and nmap to use",
         required=False,
     )
-    parser.add_argument(
+    group_scan_settings.add_argument(
         "--router-ip",
         action="store",
         help="IP address of your router for the masscan, e. g., when scanning from Nethunter/Android",
         required=False,
     )
-    parser.add_argument(
+    group_output.add_argument(
         "-oi",
         "--only-ips",
         action="store_true",
         help="output only IP adresses, default: all resources",
         required=False,
     )
-    parser.add_argument(
+    group_output.add_argument(
         "-od",
         "--only-domains",
         action="store_true",
         help="output only domains, default: all resources",
         required=False,
     )
-    parser.add_argument(
+    group_output.add_argument(
         "-q",
         "--quite",
         action="store_true",
         help="output only results",
         required=False,
-    )
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=current_version
     )
     group_nmap.add_argument(
         "--nmap",
@@ -136,23 +136,34 @@ def main():
         action="store",
         help="path to save output file in XML format (same as nmap option -oX)",
     )
+    group_version.add_argument(
+        "--version",
+        action="version",
+        version=current_version
+    )
 
     args = parser.parse_args()
 
     arg_ports = args.ports
+    arg_top_ports = args.top_ports
+    arg_yummy_ports = args.yummy_ports
     arg_resolvers = args.resolvers
     arg_max_rate = args.max_rate
     arg_interface = args.interface
     arg_router_ip = args.router_ip
     arg_targets = args.targets
-    arg_modules = args.modules
+    arg_target = args.target
     arg_only_domains = args.only_domains
     arg_only_ips = args.only_ips
-    arg_top_ports = args.top_ports
     arg_nmap = args.nmap
     arg_nmap_options = args.nmap_options
     arg_nmap_threads = args.nmap_threads
     arg_nmap_output = args.nmap_output
+
+    if (arg_targets or arg_target) is None:
+        if is_tty == True:
+            parser.error("the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options")
+            raise SystemExit
 
     if args.quite:
         logging_level = logging.ERROR
@@ -166,7 +177,7 @@ def main():
     / /_/ / __/  ___/ / /__/ /_/ / / / /
     \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
                                         
-    \033[97mJust Fu*king Scan / version: {current_version} / author: @nullt3r\033[0m
+    \033[97mversion: {current_version} / author: @nullt3r\033[0m
 
     """)
     
@@ -189,13 +200,19 @@ def main():
 
     if arg_top_ports is not None:
         scan_masscan_args = (None, arg_max_rate, arg_top_ports, arg_interface, arg_router_ip)
-    else:
+    elif arg_ports is not None:
         port_chars = re.compile(r"^[0-9,\-]+$")
         if not re.search(port_chars, arg_ports):
             parser.error("ports are in a wrong format")
             raise SystemExit
         scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface, arg_router_ip)
-
+    elif arg_yummy_ports is not None:
+        scan_masscan_args = (",".join(str(port) for port in utils.yummy_ports()),
+                            arg_max_rate,
+                            None,
+                            arg_interface,
+                            arg_router_ip,
+                        )
 
     if arg_nmap:
         if arg_nmap_options is not None:
@@ -217,12 +234,7 @@ def main():
         utils.check_dependency("nmap", "--version", "Nmap version 7.")
         utils.check_dependency("masscan", "--version", "1.3.2")
 
-        utils.load_targets(res, arg_targets, is_tty)
-
-        if arg_modules is not None:
-            for module in arg_modules.split(","):
-                if module in available_modules:
-                    getattr(modules, module)(res)
+        utils.load_targets(res, targets_file = arg_targets, target = arg_target)
 
         modules.scan_masscan(res, *scan_masscan_args)
 
@@ -234,7 +246,6 @@ def main():
 
     except KeyboardInterrupt:
         logger.fatal("ctrl+c received, exiting")
-
         raise SystemExit
 
     """
