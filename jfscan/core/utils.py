@@ -167,7 +167,7 @@ class Utils:
             _file.close()
 
         if target is not None:
-            targets.append(target)
+            targets += target
 
         if sys.stdin.isatty() == False:
             logger.info(

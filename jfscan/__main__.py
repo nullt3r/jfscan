@@ -37,7 +37,7 @@ def main():
     group_targets.add_argument(
         "target",
         action="store",
-        help="a target, accepted form is: domain name, IPv4, IPv6, URL",
+        help="a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL",
         nargs='?',
     )
     group_targets.add_argument(
@@ -165,6 +165,9 @@ def main():
             parser.error("the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options")
             raise SystemExit
 
+    if arg_target is not None:
+         arg_target = arg_target.split(",")
+
     if args.quite:
         logging_level = logging.ERROR
     else:
@@ -207,7 +210,7 @@ def main():
             raise SystemExit
         scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface, arg_router_ip)
     elif arg_yummy_ports is not None:
-        scan_masscan_args = (",".join(str(port) for port in utils.yummy_ports()),
+        scan_masscan_args = (",".join(map(str, utils.yummy_ports())),
                             arg_max_rate,
                             None,
                             arg_interface,

@@ -21,7 +21,7 @@ class Modules:
         if len(ports) == 0:
             return
 
-        if len(ports) > 250:
+        if len(ports) > 350:
             logger.error("host %s has %s of open ports, probably firewall messing with us - not scanning", host, len(ports))
             return
 
@@ -148,12 +148,12 @@ class Modules:
         logger = self.logger
         utils = self.utils
 
+        logger.info("port scanning started")
+
         if logging.INFO >= logging.root.level:
             stream_output = True
         else:
             stream_output = False
-
-        logger.info("port scanning started")
 
         ips = resources.get_ips()
         cidrs = resources.get_cidrs()

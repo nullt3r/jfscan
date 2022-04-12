@@ -3,9 +3,9 @@
 # Description
 ## Killing features
 * Perform a large-scale scans using Nmap! Allows you to use Masscan to scan targets and execute Nmap on detected ports with custom settings. Nmap on steroids. *
-* Scans targets in variety of formats.
+* Scans targets in variety of formats, including domain names!
 * Results can be produced in domain:port format.
-* It runs in stdin/stdout mode, allowing you to stream results to other tools.
+* It works in stdin/stdout mode, allowing you to stream results to/from other tools.
 * Can produce standard Nmap XML report.
 
 The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
@@ -111,10 +111,6 @@ Read file LICENSE.
 # Disclaimer
 I am not responsible for any damages. You are responsible for your own
 actions. Attacking targets without prior mutual consent is illegal.
-
-# Known issues
-* Running enum_amass will take forever if there is more then 10 domains on the input. Amass takes forever and sometimes fails... help me to resolve it :)
-
 ___
 
 \* *When scanning smaller network ranges, you can just use nmap directly, there is no need to use JFScan. You can reach up to 70% of the speed of JFScan using the following options:*
