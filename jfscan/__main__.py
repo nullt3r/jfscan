@@ -1,271 +1,131 @@
+# pylint: disable=import-error
 #!/usr/bin/env python3
 import logging
-import argparse
-import sys
-import re
-import subprocess
-import validators
 
 from jfscan.core.resources import Resources
 from jfscan.core.utils import Utils
-from jfscan.core.modules import Modules
+from jfscan.core.arg_handler import ArgumentHandler
+from jfscan.core.logging_formatter import CustomFormatter
+
+from jfscan.modules.Masscan import Masscan
+from jfscan.modules.Nmap import Nmap
 
 from jfscan import __version__
 
-current_version = __version__.__version__
+CURRENT_VERSION = __version__.__version__
 
 def main():
-    logger = logging.getLogger(__name__)
-    logging_format = '[%(asctime)s] [%(levelname)s] [%(module)s.%(funcName)s] - %(message)s'
-
-
-    parser = argparse.ArgumentParser(description="JFScan - Just Fu*king Scan")
-    
-    group_ports = parser.add_mutually_exclusive_group(required=True)
-    group_nmap = parser.add_argument_group()
-    group_targets = parser.add_argument_group()
-    group_output = parser.add_argument_group()
-    group_scan_settings = parser.add_argument_group()
-    group_version = parser.add_argument_group()
-
-    if sys.stdin.isatty():
-        is_tty = True
-    else:
-        is_tty = False
-
-
-    group_targets.add_argument(
-        "target",
-        action="store",
-        help="a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL",
-        nargs='?',
-    )
-    group_targets.add_argument(
-        "--targets",
-        action="store",
-        help="file with targets, accepted form is: domain name, IPv4, IPv6, URL",
-        required=False,
-    )
-    group_ports.add_argument(
-        "-p",
-        "--ports",
-        action="store",
-        help="ports, can be a range or port list: 0-65535 or 22,80,100-500,...",
-        required=False,
-    )
-    group_ports.add_argument(
-        "--top-ports",
-        action="store",
-        type=int,
-        help="scan only N of the top ports, e. g., --top-ports 1000",
-        required=False,
-    )
-    group_ports.add_argument(
-        "--yummy-ports",
-        action="store_true",
-        help="scan only for the most yummy ports",
-        required=False,
-    )
-    group_scan_settings.add_argument(
-        "--resolvers",
-        action="store",
-        help="custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1",
-        required=False,
-    )
-    group_scan_settings.add_argument(
-        "-r",
-        "--max-rate",
-        action="store",
-        type=int,
-        default=30000,
-        help="max kpps rate",
-        required=False,
-    )
-    group_scan_settings.add_argument(
-        "-i",
-        "--interface",
-        action="store",
-        help="interface for masscan and nmap to use",
-        required=False,
-    )
-    group_scan_settings.add_argument(
-        "--router-ip",
-        action="store",
-        help="IP address of your router for the masscan, e. g., when scanning from Nethunter/Android",
-        required=False,
-    )
-    group_output.add_argument(
-        "-oi",
-        "--only-ips",
-        action="store_true",
-        help="output only IP adresses, default: all resources",
-        required=False,
-    )
-    group_output.add_argument(
-        "-od",
-        "--only-domains",
-        action="store_true",
-        help="output only domains, default: all resources",
-        required=False,
-    )
-    group_output.add_argument(
-        "-q",
-        "--quite",
-        action="store_true",
-        help="output only results",
-        required=False,
-    )
-    group_nmap.add_argument(
-        "--nmap",
-        action="store_true",
-        help="run nmap on discovered ports",
-    )
-    group_nmap.add_argument(
-        "--nmap-options",
-        action="store",
-        help="nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --script ssh-auth-methods'",
-    )
-    group_nmap.add_argument(
-        "--nmap-threads",
-        action="store",
-        type=int,
-        help="number of nmaps to run concurrently, default 8",
-    )
-    group_nmap.add_argument(
-        "--nmap-output",
-        action="store",
-        help="path to save output file in XML format (same as nmap option -oX)",
-    )
-    group_version.add_argument(
-        "--version",
-        action="version",
-        version=current_version
-    )
-
-    args = parser.parse_args()
-
-    arg_ports = args.ports
-    arg_top_ports = args.top_ports
-    arg_yummy_ports = args.yummy_ports
-    arg_resolvers = args.resolvers
-    arg_max_rate = args.max_rate
-    arg_interface = args.interface
-    arg_router_ip = args.router_ip
-    arg_targets = args.targets
-    arg_target = args.target
-    arg_only_domains = args.only_domains
-    arg_only_ips = args.only_ips
-    arg_nmap = args.nmap
-    arg_nmap_options = args.nmap_options
-    arg_nmap_threads = args.nmap_threads
-    arg_nmap_output = args.nmap_output
-
-    if (arg_targets or arg_target) is None:
-        if is_tty == True:
-            parser.error("the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options")
-            raise SystemExit
-
-    if arg_target is not None:
-         arg_target = arg_target.split(",")
-
-    if args.quite:
-        logging_level = logging.ERROR
-    else:
-        logging_level = logging.INFO
-        print(
-            f"""\033[38;5;63m
-           _____________                
-          / / ____/ ___/_________ _____ 
-     __  / / /_   \__ \/ ___/ __ `/ __ \\
-    / /_/ / __/  ___/ / /__/ /_/ / / / /
-    \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
-                                        
-    \033[97mversion: {current_version} / author: @nullt3r\033[0m
-
-    """)
-    
-    logging.basicConfig(level=logging_level, format=logging_format, datefmt='%Y-%m-%d %H:%M:%S')
-
-    if arg_resolvers is not None:
-        logger.info(" using custom resolvers: %s", ", ".join(arg_resolvers.split(",")))
-        user_resolvers = arg_resolvers.split(",")
-        utils = Utils(resolvers = user_resolvers)
-    else:
-        utils = Utils()
-
-    res = Resources(utils)
-    modules = Modules(utils)
-
-    if arg_router_ip is not None:
-        if validators.ipv4(arg_router_ip) != True:
-            parser.error("--router-ip has to be an IP addresses")
-            raise SystemExit
-
-    if arg_top_ports is not None:
-        scan_masscan_args = (None, arg_max_rate, arg_top_ports, arg_interface, arg_router_ip)
-    elif arg_ports is not None:
-        port_chars = re.compile(r"^[0-9,\-]+$")
-        if not re.search(port_chars, arg_ports):
-            parser.error("ports are in a wrong format")
-            raise SystemExit
-        scan_masscan_args = (arg_ports, arg_max_rate, None, arg_interface, arg_router_ip)
-    elif arg_yummy_ports is not None:
-        scan_masscan_args = (",".join(map(str, utils.yummy_ports())),
-                            arg_max_rate,
-                            None,
-                            arg_interface,
-                            arg_router_ip,
-                        )
-
-    if arg_nmap:
-        if arg_nmap_options is not None:
-            if any(_opt in arg_nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
-                parser.error("output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to single xml file (like -oX)")
-
-            result = subprocess.run(
-                    f"nmap -p 65532 127.0.0.1 {arg_nmap_options}",
-                    capture_output=True,
-                    shell=True,
-                    check=False,
-                )
-
-            if result.returncode != 0:
-                parser.error("incorrect nmap options: \n\n{0}".format(result.stderr.decode("UTF-8")))
-                raise SystemExit
-
     try:
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(CustomFormatter())
+        logger.addHandler(stream_handler)
+
+        arguments = ArgumentHandler()
+
+        if arguments.quite is True:
+            logger.level = logging.ERROR
+        else:
+            logger.level = logging.INFO
+            print(
+                f"""\033[38;5;63m
+               _____________                
+              / / ____/ ___/_________ _____ 
+         __  / / /_   \__ \/ ___/ __ `/ __ \\
+        / /_/ / __/  ___/ / /__/ /_/ / / / /
+        \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
+                                            
+        \033[97mversion: {CURRENT_VERSION} / author: @nullt3r\033[0m
+
+        """)
+
+        if arguments.resolvers is not None:
+            user_resolvers = arguments.resolvers.split(",")
+            logger.info("using custom resolvers: %s", ", ".join(user_resolvers))
+            utils = Utils(resolvers = user_resolvers)
+        else:
+            utils = Utils()
+
+        res = Resources(utils)
+        masscan = Masscan(utils)
+        nmap = Nmap(utils)
+        ports_count = 0
+
+        if arguments.router_ip is not None:
+            masscan.router_ip = arguments.router_ip
+
+        if arguments.top_ports is not None:
+            ports_count += arguments.top_ports
+            masscan.top_ports = arguments.top_ports
+
+        if arguments.ports is not None:
+            masscan.ports = arguments.ports
+            for _port in arguments.ports.split(","):
+                if "-" in _port:
+                    ports_count += int(_port.split("-")[1]) - int(_port.split("-")[0])
+                else:
+                    ports_count += 1
+
+        if arguments.yummy_ports is True:
+            yummy_ports = utils.yummy_ports()
+            ports_count += len(yummy_ports)
+            masscan.ports = ",".join(map(str, yummy_ports))
+
         utils.check_dependency("nmap", "--version", "Nmap version 7.")
         utils.check_dependency("masscan", "--version", "1.3.2")
 
-        utils.load_targets(res, targets_file = arg_targets, target = arg_target)
+        utils.load_targets(res,
+                           targets_file = arguments.targets,
+                           target = arguments.target.split(",") if arguments.target is not None else None
+        )
+        ip_count = res.count_ips()
 
-        modules.scan_masscan(res, *scan_masscan_args)
+        if ip_count == 0:
+            logger.error("nothing to scan, no domains were resolved")
+            raise SystemExit
 
-        if arg_nmap:
-            if arg_nmap_output is not None:
-                modules.scan_nmap(res, arg_nmap_options, arg_interface, arg_nmap_output, arg_nmap_threads)
+        computed_rate = utils.compute_rate(ip_count, ports_count, arguments.max_rate)
+
+        logger.info("adjusting packet rate to %s kpps", computed_rate)
+
+        masscan.rate = computed_rate
+
+        masscan.run(res)
+
+        if arguments.nmap is True:
+            if arguments.interface is not None:
+                nmap.interface = arguments.interface
+
+            if arguments.nmap_output is not None:
+                nmap.output = arguments.nmap_output
+
+            if arguments.nmap_threads is not None:
+                nmap.threads = arguments.nmap_threads
+
+            if arguments.nmap_options is not None:
+                nmap.options = arguments.nmap_options
+
+            nmap.run(res)
+        else:
+            if arguments.only_domains is True:
+                results = res.get_list(ips=False, domains=True)
+            elif arguments.only_ips is True:
+                results = res.get_list(ips=True, domains=False)
             else:
-                modules.scan_nmap(res, arg_nmap_options, arg_interface, None, arg_nmap_threads)
+                results = res.get_list(ips=True, domains=True)
+
+            for line in results:
+                print(line)
 
     except KeyboardInterrupt:
-        logger.fatal("ctrl+c received, exiting")
+        logger.fatal("ctrl+c was pressed, cleaning up & exiting...")
+
+        import os, glob
+        for jfscan_file in glob.glob("/tmp/_jfscan_*"):
+            os.remove(jfscan_file)
+
         raise SystemExit
-
-    """
-    Report results
-    """
-    if not arg_nmap:
-        if arg_only_domains == True:
-            results = res.get_list(ips=False, domains=True)
-
-        elif arg_only_ips == True:
-            results = res.get_list(ips=True, domains=False)
-
-        else:
-            results = res.get_list(ips=True, domains=True)
-
-        for line in results:
-            print(line)
 
 if __name__ == "__main__":
     main()
+

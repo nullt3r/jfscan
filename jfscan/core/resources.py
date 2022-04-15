@@ -4,7 +4,6 @@ import tldextract
 import sqlite3
 import validators
 
-
 class Resources:
     def __init__(self, utils):
         self.logger = logging.getLogger(__name__)
@@ -21,10 +20,14 @@ class Resources:
 
         cur = self.conn.cursor()
 
-        init_table_domains = "CREATE TABLE domains (domain TEXT, ip_rowid INTEGER, UNIQUE(domain, ip_rowid))"
-        init_table_ips = "CREATE TABLE ips (ip TEXT, version INTEGER, UNIQUE(ip, version))"
-        init_table_ports = "CREATE TABLE ports (port INTEGER, protocol TEXT, ip_rowid INTEGER, UNIQUE(port, protocol, ip_rowid))"
-        init_table_cidrs = "CREATE TABLE cidrs (cidr TEXT, version, UNIQUE(cidr, version))"
+        init_table_domains = "CREATE TABLE domains\
+             (domain TEXT, ip_rowid INTEGER, UNIQUE(domain, ip_rowid))"
+        init_table_ips = "CREATE TABLE ips\
+             (ip TEXT, version INTEGER, UNIQUE(ip, version))"
+        init_table_ports = "CREATE TABLE ports\
+             (port INTEGER, protocol TEXT, ip_rowid INTEGER, UNIQUE(port, protocol, ip_rowid))"
+        init_table_cidrs = "CREATE TABLE cidrs\
+             (cidr TEXT, version, UNIQUE(cidr, version))"
 
         cur.execute(init_table_domains)
         cur.execute(init_table_ips)
@@ -44,7 +47,7 @@ class Resources:
 
     def add_domain(self, domain):
         ips = self.utils.resolve_host(domain)
-  
+
         conn = self.conn
         cur = conn.cursor()
 
@@ -65,7 +68,9 @@ class Resources:
             else:
                 continue
 
-            cur.execute("INSERT OR IGNORE INTO domains(domain, ip_rowid) VALUES(?, (SELECT rowid FROM ips where ip = ?))", (domain, ip))
+            cur.execute("INSERT OR IGNORE INTO\
+                 domains(domain, ip_rowid) \
+                     VALUES(?, (SELECT rowid FROM ips where ip = ?))", (domain, ip))
 
 
         conn.commit()
@@ -90,7 +95,9 @@ class Resources:
 
         self.add_ip(ip)
 
-        cur.execute("INSERT OR IGNORE INTO ports(port, protocol, ip_rowid) VALUES(?, ?, (SELECT rowid FROM ips WHERE ip = ?))", (port, protocol, ip))
+        cur.execute("INSERT OR IGNORE INTO\
+             ports(port, protocol, ip_rowid)\
+                  VALUES(?, ?, (SELECT rowid FROM ips WHERE ip = ?))", (port, protocol, ip))
 
         conn.commit()
 
@@ -113,12 +120,14 @@ class Resources:
         for ip in ips:
             ip = ip[0]
 
-            ports = cur.execute("SELECT port FROM ports JOIN ips ON ip = ips.ip WHERE ips.rowid = ports.ip_rowid AND ip = ?", (ip, )).fetchall()
+            ports = cur.execute("SELECT port FROM ports JOIN ips ON\
+                 ip = ips.ip WHERE ips.rowid = ports.ip_rowid AND ip = ?", (ip, )).fetchall()
 
             if len(ports) == 0:
                 continue
 
-            domains = cur.execute("SELECT domain FROM domains WHERE ip_rowid = (SELECT rowid FROM ips WHERE ip = ?)", (ip, )).fetchall()
+            domains = cur.execute("SELECT domain FROM domains\
+                 WHERE ip_rowid = (SELECT rowid FROM ips WHERE ip = ?)", (ip, )).fetchall()
 
             if len(domains) != 0:
                 results.append(([domain for domain, in domains], ip, [port for port, in ports]))
@@ -167,14 +176,34 @@ class Resources:
         cur = conn.cursor()
         results = []
 
-        if ips == True:
-            rows = cur.execute("SELECT DISTINCT ip, port FROM ports JOIN ips ON ip = ips.ip WHERE ips.rowid = ports.ip_rowid").fetchall()
+        if ips is True:
+            rows = cur.execute("SELECT DISTINCT ip, port FROM ports\
+                 JOIN ips ON ip = ips.ip WHERE ips.rowid = ports.ip_rowid").fetchall()
             for row in rows:
                 results.append(f"{row[0]}:{row[1]}")
 
-        if domains == True:
-            rows = cur.execute("SELECT DISTINCT domain, port FROM ports JOIN domains ON domain = domains.domain WHERE domains.ip_rowid = ports.ip_rowid").fetchall()
+        if domains is True:
+            rows = cur.execute("SELECT DISTINCT domain, port FROM ports\
+                 JOIN domains ON domain = domains.domain WHERE domains.ip_rowid = ports.ip_rowid").fetchall()
             for row in rows:
                 results.append(f"{row[0]}:{row[1]}")
 
         return results
+
+    def count_ips(self):
+        conn = self.conn
+        cur = conn.cursor()
+
+        cidrs = cur.execute("SELECT DISTINCT cidr FROM cidrs").fetchall()
+
+        address_count = 0
+
+        for cidr, in cidrs:
+            address_count += (2 ** (32 - int(cidr.split("/")[1]))) - 2
+
+        ips_count = cur.execute("SELECT count(DISTINCT ip) FROM ips").fetchall()
+
+        address_count += ips_count[0][0]
+
+        return address_count
+

@@ -1,14 +1,15 @@
+# pylint: disable=import-error
 #!/usr/bin/env python3
 import subprocess
 import logging
-import validators
 import os
 import sys
-import dns.resolver
 import socket
 import random
 import string
 import selectors
+import validators
+import dns.resolver
 
 
 class Utils:
@@ -16,11 +17,11 @@ class Utils:
         self.logger = logging.getLogger(__name__)
         self.resolvers = resolvers
 
-    def check_dependency(self, bin, version_flag = None, version_string = None):
+    def check_dependency(self, binary, version_flag = None, version_string = None):
         logger = self.logger
 
         result = subprocess.run(
-                f"which {bin}",
+                f"which {binary}",
                 capture_output=True,
                 shell=True,
                 check=False,
@@ -34,14 +35,15 @@ class Utils:
 
         if version_flag and version_string is not None:
             result = subprocess.run(
-                f"{bin} {version_flag}",
+                f"{binary} {version_flag}",
                 capture_output=True,
                 shell=True,
                 check=False,
             )
 
             if version_string not in str(result.stdout):
-                logger.fatal("wrong version of %s is installed - version %s is required", bin, version_string)
+                logger.fatal("wrong version of %s is installed\
+                     - version %s is required", binary, version_string)
 
                 raise SystemExit
 
@@ -51,7 +53,7 @@ class Utils:
 
         logger.debug("running command %s", cmd)
 
-        if stream_output == False:
+        if stream_output is False:
             process = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -69,29 +71,33 @@ class Utils:
         _stdout = b''
         _stderr = b''
 
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+            sel = selectors.DefaultSelector()
+            sel.register(process.stdout, selectors.EVENT_READ)
+            sel.register(process.stderr, selectors.EVENT_READ)
 
-        sel = selectors.DefaultSelector()
-        sel.register(process.stdout, selectors.EVENT_READ)
-        sel.register(process.stderr, selectors.EVENT_READ)
-
-        while True:
-            for key, _ in sel.select():
-                data = key.fileobj.read1()
-                if not data:
-                    returncode = process.poll()
-                    if returncode != 0:
-                        logger.error(
-                            "there was an exception while running command:\n %s",
-                            cmd
-                        )
-                    return subprocess.CompletedProcess(process.args, process.returncode, _stdout, _stderr)
-                if key.fileobj is process.stdout:
-                    print(data.decode(), end="")
-                    _stdout += data
-                else:
-                    print(data.decode(), end="", file=sys.stderr)
-                    _stderr += data
+            while True:
+                for key, _ in sel.select():
+                    data = key.fileobj.read1()
+                    if not data:
+                        process.wait()
+                        returncode = process.poll()
+                        if returncode != 0:
+                            logger.error(
+                                "there was an exception while running command:\n %s",
+                                cmd
+                            )
+                        return subprocess.CompletedProcess(process.args,
+                                                           process.returncode,
+                                                           _stdout,
+                                                           _stderr
+                                                        )
+                    if key.fileobj is process.stdout:
+                        print(data.decode(), end="")
+                        _stdout += data
+                    else:
+                        print(data.decode(), end="", file=sys.stderr)
+                        _stderr += data
 
     def resolve_host(self, host):
         logger = self.logger
@@ -104,17 +110,18 @@ class Utils:
         ips = []
         try:
             result = resolver.query(host, "A")
-        except:
+        except Exception as e:
             logger.warning(
-                "the host %s could not be resolved by provided resolvers", host
+                "%s could not be resolved by provided resolvers:\n %s", host, e
             )
             return None
+
         if result is not None and len(result) != 0:
             for ipval in result:
                 ips.append(ipval.to_text())
             return list(set(ips))
-        else:
-            return None
+
+        return None
 
     """
     Beta feature: Not tested, maybe it's not working as intended.
@@ -140,10 +147,8 @@ class Utils:
             result = sock.connect_ex((host, port))
         except:
             pass
-        if result == 0:
-            return True
-        else:
-            return False
+
+        return bool(result)
 
     """
     Not too efficient way.
@@ -162,14 +167,13 @@ class Utils:
                 )
                 raise SystemExit
 
-            _file = open(targets_file, "r")
-            targets += _file.readlines()
-            _file.close()
+            with open(targets_file, "r") as _file:
+                targets += _file.readlines()
 
         if target is not None:
             targets += target
 
-        if sys.stdin.isatty() == False:
+        if sys.stdin.isatty() is False:
             logger.info(
                 "reading input from stdin"
             )
@@ -225,3 +229,12 @@ class Utils:
     @staticmethod
     def yummy_ports():
         return [22,21,23,80,443,389,636,8443,9443,8088,9088,8081,9081,8090,8983,8161,8009,6066,7077,9998,3306,1433,6379,5984,27017,27018,27019,5000,9010,9999,9998,8855,1099,5044,9600,9700,9200,9300,5601,10080,10443,3000,3322,8086,4712,4560,8834,3343,8080,8081,7990,7999,5701,7992,7993,4848,8080,5900,5901,111,2049,1110,4045,135,139,445]
+
+    @staticmethod
+    def compute_rate(num_ips, num_ports, max_rate):
+        computed_rate = num_ips * num_ports / (num_ports / 100)
+
+        if computed_rate > max_rate:
+            return int(max_rate)
+
+        return int(computed_rate)
