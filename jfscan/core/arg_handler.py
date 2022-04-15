@@ -24,8 +24,7 @@ class ArgumentHandler:
         group_targets.add_argument(
             "target",
             action="store",
-            help="a target or targets separated by a comma,\
-                accepted form is: domain name, IPv4, IPv6, URL",
+            help="a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL",
             nargs='?',
         )
         group_targets.add_argument(
@@ -79,8 +78,7 @@ class ArgumentHandler:
         group_scan_settings.add_argument(
             "--router-ip",
             action="store",
-            help="IP address of your router for the masscan,\
-                e. g., when scanning from Nethunter/Android",
+            help="IP address of your router for the masscan, e. g., when scanning from Nethunter/Android",
             required=False,
         )
         group_output.add_argument(
@@ -135,8 +133,7 @@ class ArgumentHandler:
 
         if (args.targets or args.target) is None:
                 if is_tty is True:
-                    parser.error("the following arguments are required: --targets,\
-                        positional parameter [target] or stdin, you can also combine all options")
+                    parser.error("the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options")
 
         if args.router_ip is not None:
             if validators.ipv4(args.router_ip) is not True:
@@ -151,14 +148,11 @@ class ArgumentHandler:
             if args.nmap_options is not None:
                 if any(_opt in args.nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
                     parser.error(
-                        "output arguments -oNSXG are not permitted, you can use option --nmap-output\
-                            to save all results to a single xml file (like -oX)"
+                        "output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to a single xml file (like -oX)"
                     )
 
                 result = subprocess.run(
-                    f"nmap --noninteractive -p 65532 127.0.0.1\
-                        {args.nmap_options}\
-                            {'-e ' + args.interface if args.interface is not None else ''}",
+                    f"nmap --noninteractive -p 65532 127.0.0.1 {args.nmap_options} {'-e ' + args.interface if args.interface is not None else ''}",
                     capture_output=True,
                     shell=True,
                     check=False,

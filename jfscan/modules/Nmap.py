@@ -23,8 +23,7 @@ class Nmap:
             return
 
         if len(ports) > 350:
-            logger.warning("host %s has %s of open ports, probably\
-                 firewall messing with us - not scanning",
+            logger.warning("host %s has %s of open ports, probably firewall messing with us - not scanning",
                  host,
                  len(ports)
             )
@@ -59,8 +58,7 @@ class Nmap:
         _stdout = result.stdout.decode("utf-8")
 
         if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
-            logger.warning("host %s seems down now, your network connection is not able\
-                 to handle the scanning, are you scanning over a wifi?", host)
+            logger.warning("host %s seems down now, your network connection is not able to handle the scanning, are you scanning over a wifi?", host)
         else:
             _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
 

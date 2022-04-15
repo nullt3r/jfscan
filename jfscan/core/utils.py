@@ -28,7 +28,7 @@ class Utils:
             )
 
         if result.returncode == 1:
-            logger.fatal("%s is not installed", bin)
+            logger.fatal("%s is not installed", binary)
 
             raise SystemExit
 
@@ -42,8 +42,7 @@ class Utils:
             )
 
             if version_string not in str(result.stdout):
-                logger.fatal("wrong version of %s is installed\
-                     - version %s is required", binary, version_string)
+                logger.fatal("wrong version of %s is installed - version %s is required", binary, version_string)
 
                 raise SystemExit
 
