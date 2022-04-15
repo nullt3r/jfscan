@@ -86,7 +86,7 @@ def main():
 
         if arguments.disable_auto_rate is False:
             computed_rate = utils.compute_rate(ip_count, ports_count, arguments.max_rate)
-            logger.info("adjusting packet rate to %s kpps", computed_rate)
+            logger.info("adjusting packet rate to %s kpps (you can disable this by --disable-auto-rate)", computed_rate)
             masscan.rate = computed_rate
         else:
             logger.info("rate adjustment disabled, expect unexpected")
