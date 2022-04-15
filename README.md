@@ -6,7 +6,7 @@
 * Scans targets in variety of formats, including domain names!
 * Results can be produced in domain:port format.
 * It works in stdin/stdout mode, allowing you to stream results to/from other tools.
-* Auto-adjusts a packet rate for masscan so you don't have to.
+* Auto-adjusts a packet rate for masscan so you don't have to (disable it by --disable-auto-rate).
 * Produces a standard Nmap XML report.
 
 The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.

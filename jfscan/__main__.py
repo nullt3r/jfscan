@@ -84,11 +84,13 @@ def main():
             logger.error("nothing to scan, no domains were resolved")
             raise SystemExit
 
-        computed_rate = utils.compute_rate(ip_count, ports_count, arguments.max_rate)
-
-        logger.info("adjusting packet rate to %s kpps", computed_rate)
-
-        masscan.rate = computed_rate
+        if arguments.disable_auto_rate is False:
+            computed_rate = utils.compute_rate(ip_count, ports_count, arguments.max_rate)
+            logger.info("adjusting packet rate to %s kpps", computed_rate)
+            masscan.rate = computed_rate
+        else:
+            logger.info("rate adjustment disabled, expect unexpected")
+            masscan.rate = arguments.max_rate
 
         masscan.run(res)
 

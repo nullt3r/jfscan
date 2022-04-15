@@ -69,6 +69,12 @@ class ArgumentHandler:
             required=False,
         )
         group_scan_settings.add_argument(
+            "--disable-auto-rate",
+            action="store_true",
+            help="disable rate adjustment mechanism (more false positives/negatives)",
+            required=False,
+        )
+        group_scan_settings.add_argument(
             "-i",
             "--interface",
             action="store",
@@ -168,6 +174,7 @@ class ArgumentHandler:
         self.yummy_ports = args.yummy_ports
         self.resolvers = args.resolvers
         self.max_rate = args.max_rate
+        self.disable_auto_rate = args.disable_auto_rate
         self.interface = args.interface
         self.router_ip = args.router_ip
         self.targets = args.targets
