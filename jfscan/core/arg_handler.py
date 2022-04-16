@@ -167,6 +167,11 @@ class ArgumentHandler:
                 if result.returncode != 0:
                     error = result.stderr.decode()
                     parser.error(f"incorrect nmap options: \n{error}")
+        
+        if args.resolvers is not None:
+            for resolver in args.resolvers.split(","):
+                if (validators.ipv4(resolver) or validators.ipv6(resolver)) is not True:
+                    parser.error("resolvers must be specified as IP addresses")
 
         self.quite = args.quite
         self.ports = args.ports

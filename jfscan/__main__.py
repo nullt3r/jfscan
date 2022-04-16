@@ -94,6 +94,18 @@ def main():
 
         masscan.run(res)
 
+        logger.info("dumping results")
+
+        if arguments.only_domains is True:
+            results = res.get_list(ips=False, domains=True)
+        elif arguments.only_ips is True:
+            results = res.get_list(ips=True, domains=False)
+        else:
+            results = res.get_list(ips=True, domains=True)
+
+        for line in results:
+            print(line)
+
         if arguments.nmap is True:
             if arguments.interface is not None:
                 nmap.interface = arguments.interface
@@ -108,16 +120,7 @@ def main():
                 nmap.options = arguments.nmap_options
 
             nmap.run(res)
-        else:
-            if arguments.only_domains is True:
-                results = res.get_list(ips=False, domains=True)
-            elif arguments.only_ips is True:
-                results = res.get_list(ips=True, domains=False)
-            else:
-                results = res.get_list(ips=True, domains=True)
 
-            for line in results:
-                print(line)
 
     except KeyboardInterrupt:
         logger.fatal("ctrl+c was pressed, cleaning up & exiting...")
