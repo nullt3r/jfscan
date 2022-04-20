@@ -32,15 +32,13 @@ class Nmap:
         ports = ",".join(map(str, ports))
 
         if output is not None:
-            _nmap_output = f"/tmp/_jfscan_{utils.random_string()}.xml"
+            nmap_output = f"/tmp/_jfscan_{utils.random_string()}.xml"
             result = utils.handle_command(
-                f"nmap {'-e ' + interface if interface is not None else ''} \
-                    --noninteractive -Pn {host} -p {ports} {options} -oX {_nmap_output}"
+                f"nmap{' -e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options} -oX {nmap_output}"
             )
         else:
             result = utils.handle_command(
-                f"nmap {'-e ' + interface if interface is not None else ''} \
-                    --noninteractive -Pn {host} -p {ports} {options}"
+                f"nmap{' -e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options}"
             )
 
         if "I cannot figure out what source address to use for device" in result.stderr.decode("utf-8"):
@@ -55,38 +53,43 @@ class Nmap:
             )
             raise SystemExit
 
-        _stdout = result.stdout.decode("utf-8")
+        nmap_stdout = result.stdout.decode("utf-8")
 
-        if "Nmap done: 1 IP address (0 hosts up)" in _stdout:
-            logger.warning("host %s seems down now, your network connection is not able to handle the scanning, are you scanning over a wifi?", host)
+        if len(domains) == 0:
+            f_host_domain = f" {host} "
         else:
-            _stdout = "\r\n".join(_stdout.splitlines()[3:][:-2]) + "\r\n"
+            f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
 
-            if len(domains) == 0:
-                f_host_domain = f" {host} "
-            else:
-                f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
+        terminal_columns = os.get_terminal_size().columns
+        
+        if terminal_columns < 93:
+            hyphen_count = terminal_columns - 7
+        else:
+            hyphen_count = 93
+        
+        output_in_colors =  nmap_stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
+        output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
+        output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-            terminal_columns = os.get_terminal_size().columns
-            
-            if terminal_columns < 93:
-                hyphen_count = terminal_columns - 7
-            else:
-                hyphen_count = 93
-            
-            output_in_colors =  _stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
+        print("-------\033[1m" + f_host_domain + "\033[0m"\
+                + "".join(["-" for s in range(hyphen_count - len(f_host_domain))]))
+
+        if "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout or result.returncode != 0:
+            logger.warning("\nHost %s seems down now, your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n", host)
+        else:
+            nmap_stdout = "\r\n".join(nmap_stdout.splitlines()[3:][:-2]) + "\r\n"
+
+            output_in_colors =  nmap_stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
             output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
             output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-            print("-------\033[1m" + f_host_domain + "\033[0m"\
-                 + "".join(["-" for s in range(hyphen_count - len(f_host_domain))])\
-                 + "\n" + output_in_colors)
+            print("\n" + output_in_colors)
 
         if output is not None:
-            if utils.file_is_empty(_nmap_output):
+            if utils.file_is_empty(nmap_output):
                 return None
             else:
-                return _nmap_output
+                return nmap_output
 
     def run(self, resources):
         logger = self.logger
@@ -107,10 +110,11 @@ class Nmap:
             return
 
 
-        processPool = multiprocessing.Pool(processes=threads)
+        process_pool = multiprocessing.Pool(processes=threads)
 
-        run = processPool.map(self._run_single_nmap, [target + (options, interface, output) for target in nmap_input])
-        processPool.close()
+        run = process_pool.map(self._run_single_nmap, [target + (options, interface, output) for target in nmap_input])
+
+        process_pool.close()
 
 
         if output is not None:

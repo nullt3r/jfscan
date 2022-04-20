@@ -54,7 +54,7 @@ class Masscan:
                     f.write(f"{cidr}\n")
 
         result = utils.handle_command(
-            f"masscan {'--interface ' + interface if interface is not None else ''} {'--router-ip ' + router_ip if router_ip is not None else ''} --open {'--ports ' + ports if top_ports is None else '--top-ports ' + str(top_ports)} --max-rate {rate} -iL {masscan_input} -oJ {masscan_output}",
+            f"masscan{' --interface ' + interface if interface is not None else ''}{' --router-ip ' + router_ip if router_ip is not None else ''}{' --ports ' + ports if top_ports is None else ' --top-ports ' + str(top_ports)} --open --max-rate {rate} -iL {masscan_input} -oJ {masscan_output}",
             stream_output
         )
 
