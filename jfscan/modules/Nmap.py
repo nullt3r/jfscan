@@ -71,11 +71,10 @@ class Nmap:
         output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
         output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-        print("-------\033[1m" + f_host_domain + "\033[0m"\
-                + "".join(["-" for s in range(hyphen_count - len(f_host_domain))]))
+        print("-------\033[1m" + f_host_domain + "\033[0m" + "".join(["-" for s in range(hyphen_count - len(f_host_domain))]))
 
         if "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout or result.returncode != 0:
-            logger.warning("\nHost %s seems down now, your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n", host)
+            logger.warning("\nHost %s seems down now, your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n\n", host)
         else:
             nmap_stdout = "\r\n".join(nmap_stdout.splitlines()[3:][:-2]) + "\r\n"
 
@@ -83,7 +82,7 @@ class Nmap:
             output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
             output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
 
-            print("\n" + output_in_colors)
+            print(output_in_colors)
 
         if output is not None:
             if utils.file_is_empty(nmap_output):
