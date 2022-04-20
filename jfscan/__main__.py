@@ -27,17 +27,13 @@ def main():
             logger.level = logging.ERROR
         else:
             logger.level = logging.INFO
-            print(
-                f"""\033[38;5;63m
-               _____________                
-              / / ____/ ___/_________ _____ 
-         __  / / /_   \__ \/ ___/ __ `/ __ \\
-        / /_/ / __/  ___/ / /__/ /_/ / / / /
-        \____/_/    /____/\___/\__,_/_/ /_/ \033[0m
-                                            
-        \033[97mversion: {CURRENT_VERSION} / author: @nullt3r\033[0m
-
-        """)
+            print(f"""\033[38;5;63m
+    ___,__, _,  _,_   ,  , 
+    ',| '|_,(_, / '|\  |\ | 
+    (_|  |   _)'\_ |-\ |'\| 
+        '  '     `'  `'  ` \033[0m
+    \033[97mversion: {CURRENT_VERSION} / author: @nullt3r\033[0m
+""")
 
         if arguments.resolvers is not None:
             user_resolvers = arguments.resolvers.split(",")
