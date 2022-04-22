@@ -24,7 +24,49 @@ JFScans logic of input & output processing:
 ![diagram](screenshots/for_dummies.png)
 
 # Usage
-![help](screenshots/help.png)
+```
+usage: jfscan [-h] [--targets TARGETS] (-p PORTS | --top-ports TOP_PORTS | --yummy-ports) [--resolvers RESOLVERS] [-r MAX_RATE] [--wait WAIT] [--disable-auto-rate] [-i INTERFACE] [--router-ip ROUTER_IP] [-oi] [-od] [-q] [--nmap]
+              [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT] [--version]
+              [target]
+
+JFScan - Just Fu*king Scan
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PORTS, --ports PORTS
+                        ports, can be a range or port list: 0-65535 or 22,80,100-500,...
+  --top-ports TOP_PORTS
+                        scan only N of the top ports, e. g., --top-ports 1000
+  --yummy-ports         scan only for the most yummy ports
+
+  --nmap                run nmap on discovered ports
+  --nmap-options NMAP_OPTIONS
+                        nmap arguments, e. g., --nmap-options='-sV' or --nmap-options='-sV --script ssh-auth-methods'
+  --nmap-threads NMAP_THREADS
+                        number of nmaps to run concurrently, default 8
+  --nmap-output NMAP_OUTPUT
+                        path to save output file in XML format (same as nmap option -oX)
+
+  target                a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL
+  --targets TARGETS     file with targets, accepted form is: domain name, IPv4, IPv6, URL
+
+  -oi, --only-ips       output only IP adresses, default: all resources
+  -od, --only-domains   output only domains, default: all resources
+  -q, --quite           output only results
+
+  --resolvers RESOLVERS
+                        custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1
+  -r MAX_RATE, --max-rate MAX_RATE
+                        max kpps rate for the masscan
+  --wait WAIT           a number of seconds to wait for packets to arrive (when scanning large networks), option for the masscan
+  --disable-auto-rate   disable rate adjustment mechanism for masscan (more false positives/negatives)
+  -i INTERFACE, --interface INTERFACE
+                        interface for masscan and nmap to use
+  --router-ip ROUTER_IP
+                        IP address of your router for the masscan, e. g., when scanning from Nethunter/Android
+
+  --version             show program's version number and exit
+```
 
 Please follow installation instructions before running. Do not run the JFScan under a root, it's not needed since we set a special permissions on the masscan binary.
 
