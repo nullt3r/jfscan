@@ -47,6 +47,9 @@ def main():
         nmap = Nmap(utils)
         ports_count = 0
 
+        if arguments.interface is not None:
+            masscan.interface = arguments.interface
+
         if arguments.router_ip is not None:
             masscan.router_ip = arguments.router_ip
 
