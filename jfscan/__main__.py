@@ -50,6 +50,9 @@ def main():
         if arguments.interface is not None:
             masscan.interface = arguments.interface
 
+        if arguments.wait is not None:
+            masscan.wait = arguments.wait
+
         if arguments.router_ip is not None:
             masscan.router_ip = arguments.router_ip
 

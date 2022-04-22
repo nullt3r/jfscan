@@ -61,18 +61,7 @@ class Nmap:
         else:
             f_host_domain = f" {host} ({', '.join([domain for domain in domains])}) "
 
-        terminal_columns = os.get_terminal_size().columns
-        
-        if terminal_columns < 93:
-            hyphen_count = terminal_columns - 7
-        else:
-            hyphen_count = 93
-        
-        output_in_colors =  nmap_stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
-        output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
-        output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
-
-        stdout_buffer += "┌──────\033[1m" + f_host_domain + "\033[0m\n"# + "".join(["-" for s in range(hyphen_count - len(f_host_domain))])
+        stdout_buffer += "┌──────\033[1m" + f_host_domain + "\033[0m\n"
         stdout_buffer += "│"
 
         if "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout or result.returncode != 0:

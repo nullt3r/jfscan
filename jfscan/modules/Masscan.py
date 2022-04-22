@@ -8,6 +8,7 @@ class Masscan:
         self.utils = utils
 
         self.rate = None
+        self.wait = None
         self.ports = None
         self.top_ports = None
         self.interface = None
@@ -27,6 +28,7 @@ class Masscan:
         top_ports = self.top_ports
         ports = self.ports
         rate = self.rate
+        wait = self.wait
 
         logger.info("port scanning using masscan started")
 
@@ -54,7 +56,7 @@ class Masscan:
                     f.write(f"{cidr}\n")
 
         result = utils.handle_command(
-            f"masscan{' --interface ' + interface if interface is not None else ''}{' --router-ip ' + router_ip if router_ip is not None else ''}{' --ports ' + ports if top_ports is None else ' --top-ports ' + str(top_ports)} --open --max-rate {rate} -iL {masscan_input} -oJ {masscan_output}",
+            f"masscan{' --wait ' + str(wait) if wait is not None else ''}{' --interface ' + interface if interface is not None else ''}{' --router-ip ' + router_ip if router_ip is not None else ''}{' --ports ' + ports if top_ports is None else ' --top-ports ' + str(top_ports)} --open --max-rate {rate} -iL {masscan_input} -oJ {masscan_output}",
             stream_output
         )
 

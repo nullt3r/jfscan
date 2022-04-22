@@ -65,13 +65,21 @@ class ArgumentHandler:
             action="store",
             type=int,
             default=30000,
-            help="max kpps rate",
+            help="max kpps rate for the masscan",
+            required=False,
+        )
+        group_scan_settings.add_argument(
+            "--wait",
+            action="store",
+            type=int,
+            default=10,
+            help="a number of seconds to wait for packets to arrive (when scanning large networks), option for the masscan",
             required=False,
         )
         group_scan_settings.add_argument(
             "--disable-auto-rate",
             action="store_true",
-            help="disable rate adjustment mechanism (more false positives/negatives)",
+            help="disable rate adjustment mechanism for masscan (more false positives/negatives)",
             required=False,
         )
         group_scan_settings.add_argument(
@@ -179,6 +187,7 @@ class ArgumentHandler:
         self.yummy_ports = args.yummy_ports
         self.resolvers = args.resolvers
         self.max_rate = args.max_rate
+        self.wait = args.wait
         self.disable_auto_rate = args.disable_auto_rate
         self.interface = args.interface
         self.router_ip = args.router_ip
