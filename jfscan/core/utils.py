@@ -13,25 +13,24 @@ import dns.resolver
 
 
 class Utils:
-    def __init__(self, resolvers = None):
+    def __init__(self, resolvers=None):
         self.logger = logging.getLogger(__name__)
         self.resolvers = resolvers
 
-    def check_dependency(self, binary, version_flag = None, version_string = None):
+    def check_dependency(self, binary, version_flag=None, version_string=None):
         logger = self.logger
 
         result = subprocess.run(
-                f"which {binary}",
-                capture_output=True,
-                shell=True,
-                check=False,
-            )
+            f"which {binary}",
+            capture_output=True,
+            shell=True,
+            check=False,
+        )
 
         if result.returncode == 1:
             logger.fatal("%s is not installed", binary)
 
             raise SystemExit
-
 
         if version_flag and version_string is not None:
             result = subprocess.run(
@@ -42,12 +41,15 @@ class Utils:
             )
 
             if version_string not in str(result.stdout):
-                logger.fatal("wrong version of %s is installed - version %s is required", binary, version_string)
+                logger.fatal(
+                    "wrong version of %s is installed - version %s is required",
+                    binary,
+                    version_string,
+                )
 
                 raise SystemExit
 
-
-    def handle_command(self, cmd, stream_output = False):
+    def handle_command(self, cmd, stream_output=False):
         logger = self.logger
 
         logger.debug("running command %s", cmd)
@@ -60,17 +62,16 @@ class Utils:
                 check=False,
             )
             if process.returncode != 0:
-                logger.error(
-                    "there was an exception while running command:\n %s",
-                    cmd
-                )
+                logger.error("there was an exception while running command:\n %s", cmd)
 
             return process
 
-        _stdout = b''
-        _stderr = b''
+        _stdout = b""
+        _stderr = b""
 
-        with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        with subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ) as process:
             sel = selectors.DefaultSelector()
             sel.register(process.stdout, selectors.EVENT_READ)
             sel.register(process.stderr, selectors.EVENT_READ)
@@ -84,13 +85,11 @@ class Utils:
                         if returncode != 0:
                             logger.error(
                                 "there was an exception while running command:\n %s",
-                                cmd
+                                cmd,
                             )
-                        return subprocess.CompletedProcess(process.args,
-                                                           process.returncode,
-                                                           _stdout,
-                                                           _stderr
-                                                        )
+                        return subprocess.CompletedProcess(
+                            process.args, process.returncode, _stdout, _stderr
+                        )
                     if key.fileobj is process.stdout:
                         print(data.decode(), end="")
                         _stdout += data
@@ -125,6 +124,7 @@ class Utils:
     """
     Beta feature: Not tested, maybe it's not working as intended.
     """
+
     def detect_firewall(self, host):
         random_ports = random.sample(range(50000, 65535), 90)
         open_ports = []
@@ -152,7 +152,8 @@ class Utils:
     """
     Not too efficient way.
     """
-    def load_targets(self, res, targets_file = None, target = None):
+
+    def load_targets(self, res, targets_file=None, target=None):
         logger = self.logger
         targets = []
 
@@ -173,15 +174,11 @@ class Utils:
             targets += target
 
         if sys.stdin.isatty() is False:
-            logger.info(
-                "reading input from stdin"
-            )
+            logger.info("reading input from stdin")
             targets += sys.stdin.readlines()
-        
+
         if len(targets) == 0:
-            logger.error(
-                "no valid targets were specified"
-            )
+            logger.error("no valid targets were specified")
             raise SystemExit
 
         target_before = None
@@ -207,8 +204,6 @@ class Utils:
 
             target_before = _target
 
-        
-
     @staticmethod
     def file_is_empty(file):
         try:
@@ -224,10 +219,77 @@ class Utils:
         return "".join(
             random.choice(string.ascii_lowercase + string.digits) for _ in range(9)
         )
-    
+
     @staticmethod
     def yummy_ports():
-        return [22,21,23,80,443,389,636,8443,9443,8088,9088,8081,9081,8090,8983,8161,8009,6066,7077,9998,3306,1433,6379,5984,27017,27018,27019,5000,9010,9999,9998,8855,1099,5044,9600,9700,9200,9300,5601,10080,10443,3000,3322,8086,4712,4560,8834,3343,8080,8081,7990,7999,5701,7992,7993,4848,8080,5900,5901,111,2049,1110,4045,135,139,445]
+        return [
+            22,
+            21,
+            23,
+            80,
+            443,
+            389,
+            636,
+            8443,
+            9443,
+            8088,
+            9088,
+            8081,
+            9081,
+            8090,
+            8983,
+            8161,
+            8009,
+            6066,
+            7077,
+            9998,
+            3306,
+            1433,
+            6379,
+            5984,
+            27017,
+            27018,
+            27019,
+            5000,
+            9010,
+            9999,
+            9998,
+            8855,
+            1099,
+            5044,
+            9600,
+            9700,
+            9200,
+            9300,
+            5601,
+            10080,
+            10443,
+            3000,
+            3322,
+            8086,
+            4712,
+            4560,
+            8834,
+            3343,
+            8080,
+            8081,
+            7990,
+            7999,
+            5701,
+            7992,
+            7993,
+            4848,
+            8080,
+            5900,
+            5901,
+            111,
+            2049,
+            1110,
+            4045,
+            135,
+            139,
+            445,
+        ]
 
     @staticmethod
     def compute_rate(num_ips, num_ports, max_rate):

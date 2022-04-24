@@ -8,6 +8,7 @@ from jfscan import __version__
 
 CURRENT_VERSION = __version__.__version__
 
+
 class ArgumentHandler:
     def __init__(self):
         is_tty = bool(sys.stdin.isatty())
@@ -25,7 +26,7 @@ class ArgumentHandler:
             "target",
             action="store",
             help="a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL",
-            nargs='?',
+            nargs="?",
         )
         group_targets.add_argument(
             "--targets",
@@ -138,29 +139,31 @@ class ArgumentHandler:
             help="path to save output file in XML format (same as nmap option -oX)",
         )
         group_version.add_argument(
-            "--version",
-            action="version",
-            version=CURRENT_VERSION
+            "--version", action="version", version=CURRENT_VERSION
         )
 
         args = parser.parse_args()
 
         if (args.targets or args.target) is None:
-                if is_tty is True:
-                    parser.error("the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options")
+            if is_tty is True:
+                parser.error(
+                    "the following arguments are required: --targets, positional parameter [target] or stdin, you can also combine all options"
+                )
 
         if args.router_ip is not None:
             if validators.ipv4(args.router_ip) is not True:
                 parser.error("--router-ip has to be an IP addresses")
-        
+
         if args.ports is not None:
             port_chars = re.compile(r"^[0-9,\-]+$")
             if not re.search(port_chars, args.ports):
                 parser.error("ports are in a wrong format")
-        
+
         if args.nmap:
             if args.nmap_options is not None:
-                if any(_opt in args.nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]):
+                if any(
+                    _opt in args.nmap_options for _opt in ["-oN", "-oS", "-oX", "-oG"]
+                ):
                     parser.error(
                         "output arguments -oNSXG are not permitted, you can use option --nmap-output to save all results to a single xml file (like -oX)"
                     )
@@ -170,12 +173,12 @@ class ArgumentHandler:
                     capture_output=True,
                     shell=True,
                     check=False,
-                    )
+                )
 
                 if result.returncode != 0:
                     error = result.stderr.decode()
                     parser.error(f"incorrect nmap options: \n{error}")
-        
+
         if args.resolvers is not None:
             for resolver in args.resolvers.split(","):
                 if (validators.ipv4(resolver) or validators.ipv6(resolver)) is not True:

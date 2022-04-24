@@ -1,5 +1,7 @@
 ![logo](screenshots/logo.png)
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan) ![Rating](https://img.shields.io/github/stars/nullt3r/jfscan?style=social)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # Description
 ## Killing features
 * Perform a large-scale scans using Nmap! Allows you to use Masscan to scan targets and execute Nmap on detected ports with custom settings. Nmap on steroids. *

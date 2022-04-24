@@ -20,7 +20,7 @@ setup(
     author="nullt3r",
     author_email="nullt3r@bugdelivery.com",
     license="MIT",
-    python_requires='>=3.6, <4',
+    python_requires=">=3.6, <4",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",

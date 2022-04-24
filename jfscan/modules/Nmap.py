@@ -3,6 +3,7 @@ import logging
 import os
 import multiprocessing
 
+
 class Nmap:
     def __init__(self, utils):
         self.logger = logging.getLogger(__name__)
@@ -23,9 +24,10 @@ class Nmap:
             return
 
         if len(ports) > 350:
-            logger.warning("host %s has %s of open ports, probably firewall messing with us - not scanning",
-                 host,
-                 len(ports)
+            logger.warning(
+                "host %s has %s of open ports, probably firewall messing with us - not scanning",
+                host,
+                len(ports),
             )
             return
 
@@ -42,16 +44,15 @@ class Nmap:
                 f"nmap{' -e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options}"
             )
 
-        if "I cannot figure out what source address to use for device" in result.stderr.decode("utf-8"):
-            logger.error(
-                "interface does not exists or can't be used for scanning"
-            )
+        if (
+            "I cannot figure out what source address to use for device"
+            in result.stderr.decode("utf-8")
+        ):
+            logger.error("interface does not exists or can't be used for scanning")
             raise SystemExit
 
         if "Could not find interface" in result.stderr.decode("utf-8"):
-            logger.error(
-                "interface does not exists or can't be used for scanning"
-            )
+            logger.error("interface does not exists or can't be used for scanning")
             raise SystemExit
 
         nmap_stdout = result.stdout.decode("utf-8")
@@ -64,14 +65,23 @@ class Nmap:
         stdout_buffer += "┌──────\033[1m" + f_host_domain + "\033[0m\n"
         stdout_buffer += "│"
 
-        if "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout or result.returncode != 0:
+        if (
+            "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout
+            or result.returncode != 0
+        ):
             stdout_buffer += f"Host {host} seems down now, your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n\n"
         else:
-            nmap_stdout = "\n│ ".join(nmap_stdout.splitlines()[3:][:-2])
+            nmap_stdout = "\n│ ".join(nmap_stdout.splitlines()[3:][:-2]) + "\n"
 
-            output_in_colors =  nmap_stdout.replace(" open ", "\033[1m\033[92m open \033[0m")
-            output_in_colors =  output_in_colors.replace(" filtered ", "\033[1m\033[93m filtered \033[0m")
-            output_in_colors =  output_in_colors.replace(" closed ", "\033[1m\033[91m closed \033[0m")
+            output_in_colors = nmap_stdout.replace(
+                " open ", "\033[1m\033[92m open \033[0m"
+            )
+            output_in_colors = output_in_colors.replace(
+                " filtered ", "\033[1m\033[93m filtered \033[0m"
+            )
+            output_in_colors = output_in_colors.replace(
+                " closed ", "\033[1m\033[91m closed \033[0m"
+            )
 
             stdout_buffer += output_in_colors
 
@@ -96,18 +106,17 @@ class Nmap:
         nmap_input = resources.get_domains_ips_and_ports()
 
         if len(nmap_input) == 0:
-            logger.error(
-                "no resources were given, nothing to scan"
-            )
+            logger.error("no resources were given, nothing to scan")
             return
-
 
         process_pool = multiprocessing.Pool(processes=threads)
 
-        run = process_pool.map(self._run_single_nmap, [target + (options, interface, output) for target in nmap_input])
+        run = process_pool.map(
+            self._run_single_nmap,
+            [target + (options, interface, output) for target in nmap_input],
+        )
 
         process_pool.close()
-
 
         if output is not None:
             logger.info("generating report %s", output)
@@ -122,7 +131,7 @@ class Nmap:
                     _reader = thread_output.readlines()
 
                     if on_first_run == 0:
-                        extract_stylesheet =_reader[2].split('"')[1]
+                        extract_stylesheet = _reader[2].split('"')[1]
                         on_first_run = 1
 
                     host_report.append("".join(_reader[8:][:-3]))
