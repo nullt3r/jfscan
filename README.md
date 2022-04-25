@@ -27,8 +27,8 @@ JFScans logic of input & output processing:
 
 # Usage
 ```
-usage: jfscan [-h] [--targets TARGETS] (-p PORTS | --top-ports TOP_PORTS | --yummy-ports) [--resolvers RESOLVERS] [-r MAX_RATE] [--wait WAIT] [--disable-auto-rate] [-i INTERFACE] [--router-ip ROUTER_IP] [-oi] [-od] [-q] [--nmap]
-              [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT] [--version]
+usage: jfscan [-h] [--targets TARGETS] (-p PORTS | --top-ports TOP_PORTS | --yummy-ports) [--resolvers RESOLVERS] [-r MAX_RATE] [--wait WAIT] [--disable-auto-rate] [-i INTERFACE] [--router-ip ROUTER_IP] [--router-mac ROUTER_MAC] [-oi] [-od] [-q]
+              [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT] [--version]
               [target]
 
 JFScan - Just Fu*king Scan
@@ -65,7 +65,9 @@ optional arguments:
   -i INTERFACE, --interface INTERFACE
                         interface for masscan and nmap to use
   --router-ip ROUTER_IP
-                        IP address of your router for the masscan, e. g., when scanning from Nethunter/Android
+                        IP address of your router for the masscan
+  --router-mac ROUTER_MAC
+                        MAC address of your router for the masscan
 
   --version             show program's version number and exit
 ```

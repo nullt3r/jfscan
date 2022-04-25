@@ -93,7 +93,13 @@ class ArgumentHandler:
         group_scan_settings.add_argument(
             "--router-ip",
             action="store",
-            help="IP address of your router for the masscan, e. g., when scanning from Nethunter/Android",
+            help="IP address of your router for the masscan",
+            required=False,
+        )
+        group_scan_settings.add_argument(
+            "--router-mac",
+            action="store",
+            help="MAC address of your router for the masscan",
             required=False,
         )
         group_output.add_argument(
@@ -194,6 +200,7 @@ class ArgumentHandler:
         self.disable_auto_rate = args.disable_auto_rate
         self.interface = args.interface
         self.router_ip = args.router_ip
+        self.router_mac = args.router_mac
         self.targets = args.targets
         self.target = args.target
         self.only_domains = args.only_domains

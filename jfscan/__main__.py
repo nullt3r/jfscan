@@ -60,6 +60,9 @@ def main():
         if arguments.router_ip is not None:
             masscan.router_ip = arguments.router_ip
 
+        if arguments.router_mac is not None:
+            masscan.router_mac = arguments.router_mac
+
         if arguments.top_ports is not None:
             ports_count += arguments.top_ports
             masscan.top_ports = arguments.top_ports
