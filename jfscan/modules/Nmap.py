@@ -9,7 +9,6 @@ class Nmap:
         self.logger = logging.getLogger(__name__)
         self.utils = utils
 
-        self.enable_ipv6 = False
         self.interface = None
         self.options = None
         self.output = None
@@ -18,6 +17,7 @@ class Nmap:
     def _run_single_nmap(self, _args):
         utils = self.utils
 
+        from jfscan.core.validator import Validator
         from jfscan.core.logging_formatter import CustomFormatter
 
         logger = logging.getLogger()
@@ -25,7 +25,7 @@ class Nmap:
         stream_handler.setFormatter(CustomFormatter())
         logger.addHandler(stream_handler)
 
-        domains, host, ports, options, interface, output, enable_ipv6 = _args
+        domains, host, ports, options, interface, output = _args
 
         if len(ports) == 0:
             return
@@ -45,7 +45,7 @@ class Nmap:
             nmap_output = '/tmp/_jfscan_' + utils.random_string() + '.xml'
 
         result = utils.handle_command(
-            f"nmap{' -e ' + interface if interface is not None else ''}{' -6 ' if enable_ipv6 is True else ''} --noninteractive -Pn {host} -p {ports}{' '+options if options is not None else ''}{' -oX ' + nmap_output if output is not None else ''}"
+            f"nmap{' -e ' + interface if interface is not None else ''}{' -6 ' if Validator.is_ipv6(host) is True else ''} --noninteractive -Pn {host} -p {ports}{' '+options if options is not None else ''}{' -oX ' + nmap_output if output is not None else ''}"
         )
 
         result_stdout = result.stdout.decode("utf-8")
@@ -120,7 +120,7 @@ class Nmap:
         process_pool = multiprocessing.Pool(processes=threads)
         run = process_pool.map(
             self._run_single_nmap,
-            [target + (options, interface, output, enable_ipv6) for target in nmap_input],
+            [target + (options, interface, output) for target in nmap_input],
         )
         process_pool.close()
 
