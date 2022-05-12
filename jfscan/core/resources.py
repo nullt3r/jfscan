@@ -2,7 +2,8 @@
 import logging
 import sqlite3
 import ipaddress
-import validators
+
+from jfscan.core.validator import Validator
 
 class Resources():
     def __init__(self, utils):
@@ -130,9 +131,9 @@ class Resources():
 
         query = "INSERT OR IGNORE INTO ips_to_scan(ip, version) VALUES(?, ?)"
 
-        if validators.ipv4(ip):
+        if Validator.is_ipv4(ip):
             cur.execute(query, (ip, 4))
-        elif validators.ipv6(ip):
+        elif Validator.is_ipv6(ip):
             cur.execute(query, (ip, 6))
         else:
             logger.warning("%s is not an valid IPv4 or IPv6 address, not scanning", ip)
@@ -240,9 +241,9 @@ class Resources():
         address_count = 0
 
         for (cidr,) in cidrs:
-            if validators.ipv6_cidr(cidr):
+            if Validator.is_ipv6_cidr(cidr):
                 address_count += (2 ** (128 - int(cidr.split("/")[1]))) - 2
-            elif validators.ipv4_cidr(cidr):
+            elif Validator.is_ipv4_cidr(cidr):
                 address_count += (2 ** (32 - int(cidr.split("/")[1]))) - 2
 
         ips_count = cur.execute("SELECT count(DISTINCT ip) FROM ips_to_scan").fetchall()
@@ -303,31 +304,31 @@ class Resources():
                 scope_item = scope_item.strip()
 
                 # If scope item is in CIDR notation
-                if validators.ipv6_cidr(scope_item):
+                if Validator.is_ipv6_cidr(scope_item):
 
                     # If checked target is just IP
-                    if validators.ipv6(target):
+                    if Validator.is_ipv6(target):
                         # We just ask if the target is part of network
                         if ipaddress.ip_address(target) in ipaddress.ip_network(scope_item):
                             return True
 
                     # If checked target is in CIDR notation
-                    if validators.ipv6_cidr(target):
+                    if Validator.is_ipv6_cidr(target):
                         # We ask if subnet is part of network
                         network = ipaddress.ip_network(scope_item)
                         if network.supernet_of(ipaddress.ip_network(target)) is True:
                             return True
 
                 # If scope item is in CIDR notation
-                if validators.ipv4_cidr(scope_item):
+                if Validator.is_ipv4_cidr(scope_item):
                     # If checked target is just IP
-                    if validators.ipv4(target):
+                    if Validator.is_ipv4(target):
                         # We just ask if the target is part of network
                         if ipaddress.ip_address(target) in ipaddress.ip_network(scope_item):
                             return True
 
                     # If checked target is in CIDR notation
-                    if validators.ipv4_cidr(target):
+                    if Validator.is_ipv4_cidr(target):
                         # We ask if subnet is part of network
                         network = ipaddress.ip_network(scope_item)
                         if network.supernet_of(ipaddress.ip_network(target)) is True:

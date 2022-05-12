@@ -8,9 +8,9 @@ import socket
 import random
 import string
 import selectors
-import validators
 import dns.resolver
 
+from jfscan.core.validator import Validator
 
 class Utils:
     def __init__(self):
@@ -205,7 +205,7 @@ class Utils:
         for _target in targets:
 
             # In case the target is URL, we have to extract it first before further checks
-            if validators.url(_target):
+            if Validator.is_url(_target):
                 _target = _target.split("/")[2]
 
             # If the next target is same as the one before, we can move onto another one
@@ -214,13 +214,13 @@ class Utils:
 
             _target = _target.strip()
 
-            if validators.domain(_target):
+            if Validator.is_domain(_target):
                 res.add_domain(_target)
 
-            elif validators.ipv4(_target) or validators.ipv6(_target):
+            elif Validator.is_ipv4(_target) or Validator.is_ipv6(_target):
                 res.add_ip(_target)
 
-            elif validators.ipv4_cidr(_target) or validators.ipv6_cidr(_target):
+            elif Validator.is_ipv4_cidr(_target) or Validator.is_ipv6_cidr(_target):
                 res.add_cidr(_target)
 
             target_before = _target

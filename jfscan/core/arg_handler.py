@@ -5,6 +5,7 @@ import sys
 import re
 
 from jfscan import __version__
+from jfscan.core.validator import Validator
 
 CURRENT_VERSION = __version__.__version__
 
@@ -195,11 +196,11 @@ class ArgumentHandler:
                 )
 
         if args.router_ip is not None:
-            if validators.ipv4(args.router_ip) or validators.ipv6(args.router_ip) is not True:
+            if Validator.is_ipv4(args.router_ip) or Validator.is_ipv6(args.router_ip) is not True:
                 parser.error("--router-ip has to be an IP addresses")
 
         if args.source_ip is not None:
-            if validators.ipv4(args.source_ip) or validators.ipv6(args.source_ip) is not True:
+            if Validator.is_ipv4(args.source_ip) or Validator.is_ipv6(args.source_ip) is not True:
                 parser.error("--source-ip has to be an IP addresses")
 
         if args.router_mac is not None:
