@@ -1,5 +1,4 @@
 import ipaddress
-import validators
 import re
 
 class Validator:
@@ -50,4 +49,5 @@ class Validator:
 
     @staticmethod
     def is_domain(domain):
+        import validators
         return validators.domain(domain)
