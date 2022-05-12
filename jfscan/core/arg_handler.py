@@ -204,13 +204,13 @@ class ArgumentHandler:
                 parser.error("--source-ip has to be an IP addresses")
 
         if args.router_mac is not None:
-            if validators.mac_address(args.router_mac) is not True:
+            if Validator.is_mac(args.router_mac) is not True:
                 parser.error("--router-mac has to be an MAC addresses")
 
         if args.router_mac_ipv6 is not None:
             if args.enable_ipv6 is False:
                 parser.error("you have to enable ipv6 by --enable-ipv6 before using option --router-mac-ipv6")
-            if validators.mac_address(args.router_mac_ipv6) is not True:
+            if Validator.is_mac(args.router_mac_ipv6) is not True:
                 parser.error("--router-mac-ipv6 has to be an MAC addresses")
 
         if args.ports is not None:
