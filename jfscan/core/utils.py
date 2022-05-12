@@ -13,9 +13,10 @@ import dns.resolver
 
 
 class Utils:
-    def __init__(self, resolvers=None):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.resolvers = resolvers
+        self.resolvers = None
+        self.enable_ipv6 = False
 
     def check_dependency(self, binary, version_flag=None, version_string=None):
         logger = self.logger
@@ -54,48 +55,47 @@ class Utils:
 
         logger.debug("running command %s", cmd)
 
-        if stream_output is False:
-            process = subprocess.run(
-                cmd,
-                capture_output=True,
-                shell=True,
-                check=False,
-            )
-            if process.returncode != 0:
-                logger.error("there was an exception while running command:\n %s", cmd)
-
-            return process
-
         _stdout = b""
         _stderr = b""
 
-        with subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        ) as process:
-            sel = selectors.DefaultSelector()
-            sel.register(process.stdout, selectors.EVENT_READ)
-            sel.register(process.stderr, selectors.EVENT_READ)
+        try:
+            with subprocess.Popen(
+                cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ) as process:
+                sel = selectors.DefaultSelector()
+                sel.register(process.stdout, selectors.EVENT_READ)
+                sel.register(process.stderr, selectors.EVENT_READ)
 
-            while True:
-                for key, _ in sel.select():
-                    data = key.fileobj.read1()
-                    if not data:
-                        process.wait()
-                        returncode = process.poll()
-                        if returncode != 0:
-                            logger.error(
-                                "there was an exception while running command:\n %s",
-                                cmd,
+                while True:
+                    for key, _ in sel.select():
+                        data = key.fileobj.read1()
+                        if not data:
+                            process.wait()
+                            returncode = process.poll()
+                            if returncode != 0:
+                                logger.error(
+                                    "there was an exception while running command:\n %s",
+                                    cmd,
+                                )
+                            return subprocess.CompletedProcess(
+                                process.args, process.returncode, _stdout, _stderr
                             )
-                        return subprocess.CompletedProcess(
-                            process.args, process.returncode, _stdout, _stderr
-                        )
-                    if key.fileobj is process.stdout:
-                        print(data.decode(), end="")
-                        _stdout += data
-                    else:
-                        print(data.decode(), end="", file=sys.stderr)
-                        _stderr += data
+                        if key.fileobj is process.stdout:
+                            if stream_output is True:
+                                print(data.decode(), end="")
+                            _stdout += data
+                        else:
+                            if stream_output is True:
+                                print(data.decode(), end="", file=sys.stderr)
+                            _stderr += data
+        except KeyboardInterrupt:
+            logger.error(
+                "process was killed, continuing..."
+            )
+            process.kill()
+            return subprocess.CompletedProcess(
+                process.args, process.returncode, _stdout, _stderr
+            )
 
     def resolve_host(self, host):
         logger = self.logger
@@ -106,20 +106,34 @@ class Utils:
             resolver.nameservers = self.resolvers
 
         ips = []
-        try:
-            result = resolver.query(host, "A")
-        except Exception as e:
-            logger.warning(
-                "%s could not be resolved by provided resolvers:\n %s", host, e
-            )
+
+        if self.enable_ipv6 is True:
+            queries = ["A", "AAAA"]
+        else:
+            queries = ["A"]
+
+        for query in queries:
+            try:
+                result = resolver.query(host, query)
+            except Exception as e:
+                logger.debug(
+                    "%s could not be resolved by provided resolvers (%s):\n %s", host, query, e
+                )
+                result = None
+
+            if result is not None and len(result) != 0:
+                for ipval in result:
+                    ips.append(ipval.to_text())
+        
+        if len(ips) == 0:
+            logger.warning("host %s could not be resolved", host)
             return None
-
-        if result is not None and len(result) != 0:
-            for ipval in result:
-                ips.append(ipval.to_text())
-            return list(set(ips))
-
-        return None
+        
+        ips = list(set(ips))
+        
+        logger.debug("host %s was resolved to: %s", host, ", ".join(ips))
+        
+        return ips
 
     """
     Beta feature: Not tested, maybe it's not working as intended.
@@ -147,11 +161,16 @@ class Utils:
         except:
             pass
 
-        return bool(result)
+        return bool(result)   
 
-    """
-    Not too efficient way.
-    """
+    def save_results(self, results, target_file):
+        logger = self.logger
+        try:
+            with open(target_file, "w", encoding="UTF-8") as f:
+                for result in results:
+                    f.write(f"{result}\n")
+        except Exception as e:
+            logger.error("Could not save results to the specified file %s:\n %s", target_file, e)
 
     def load_targets(self, res, targets_file=None, target=None):
         logger = self.logger
@@ -161,13 +180,13 @@ class Utils:
 
         if targets_file is not None:
             if self.file_is_empty(targets_file):
-                logger.error(
-                    "file is empty or does not exists: %s",
+                logger.fatal(
+                    "input file is empty or does not exists: %s",
                     targets_file,
                 )
                 raise SystemExit
 
-            with open(targets_file, "r") as _file:
+            with open(targets_file, "r", encoding="UTF-8") as _file:
                 targets += _file.readlines()
 
         if target is not None:
@@ -185,9 +204,11 @@ class Utils:
 
         for _target in targets:
 
+            # In case the target is URL, we have to extract it first before further checks
             if validators.url(_target):
                 _target = _target.split("/")[2]
 
+            # If the next target is same as the one before, we can move onto another one
             if _target == target_before:
                 continue
 

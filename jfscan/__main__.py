@@ -18,17 +18,26 @@ CURRENT_VERSION = __version__.__version__
 
 def main():
     try:
+        # Setup logging
         logger = logging.getLogger()
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(CustomFormatter())
         logger.addHandler(stream_handler)
 
+        # Handle arguments
         arguments = ArgumentHandler()
 
+        ports_count = 0
+
+        # Set the debug level
         if arguments.quite is True:
             logger.level = logging.ERROR
         else:
-            logger.level = logging.INFO
+            if arguments.verbose is True:
+                logger.level = logging.DEBUG
+            else:
+                logger.level = logging.INFO
+
             print(
                 f"""\033[38;5;63m
     ___,__, _,  _,_   ,  , 
@@ -39,18 +48,30 @@ def main():
 """
             )
 
+        # Set arguments for Utils first
+        utils = Utils()
+
         if arguments.resolvers is not None:
             user_resolvers = arguments.resolvers.split(",")
             logger.info("using custom resolvers: %s", ", ".join(user_resolvers))
-            utils = Utils(resolvers=user_resolvers)
-        else:
-            utils = Utils()
+            utils.resolvers = user_resolvers
 
+        if arguments.enable_ipv6 is True:
+            logger.info("enabling IPv6 support")
+            utils.enable_ipv6 = arguments.enable_ipv6
+
+        # Create new instance of the modules with a prepared Utils class.
+        # Is there a better way?
         res = Resources(utils)
         masscan = Masscan(utils)
         nmap = Nmap(utils)
-        ports_count = 0
 
+        # Set additional parameters for Resources
+        if arguments.scope is not None:
+            logger.info("targets will be validated against scope defined in file %s", arguments.scope)
+            res.scope_file = arguments.scope
+
+        # Set additional parameters for Masscan
         if arguments.interface is not None:
             masscan.interface = arguments.interface
 
@@ -62,6 +83,12 @@ def main():
 
         if arguments.router_mac is not None:
             masscan.router_mac = arguments.router_mac
+
+        if arguments.router_mac_ipv6 is not None:
+            masscan.router_mac_ipv6 = arguments.router_mac_ipv6
+
+        if arguments.source_ip is not None:
+            masscan.source_ip = arguments.source_ip
 
         if arguments.top_ports is not None:
             ports_count += arguments.top_ports
@@ -80,9 +107,11 @@ def main():
             ports_count += len(yummy_ports)
             masscan.ports = ",".join(map(str, yummy_ports))
 
+        # Check dependencies
         utils.check_dependency("nmap", "--version", "Nmap version 7.")
         utils.check_dependency("masscan", "--version", "1.3.2")
 
+        # Load targets specified by user
         utils.load_targets(
             res,
             targets_file=arguments.targets,
@@ -90,12 +119,21 @@ def main():
             if arguments.target is not None
             else None,
         )
+
+        # Count all the possible IPs to be scanned for the auto-rate feature
         ip_count = res.count_ips()
 
         if ip_count == 0:
             logger.error("nothing to scan, no domains were resolved")
             raise SystemExit
+        elif ip_count > 2**32:
+            logger.fatal("number of IPs to be scanned is very large (%s to be exact), you probably specified wrong IPv6 network range...", ip_count)
+            raise SystemExit
 
+        # Lets continue if number of IPs to be scanned is acceptable
+        logger.info("%s unique IP addresses will be scanned", ip_count)
+
+        # Set another parameters to masscan: adjust masscan's rate
         if arguments.disable_auto_rate is False:
             computed_rate = utils.compute_rate(
                 ip_count, ports_count, arguments.max_rate
@@ -106,25 +144,31 @@ def main():
             )
             masscan.rate = computed_rate
         else:
-            logger.info("rate adjustment disabled, expect unexpected")
+            logger.info("rate adjustment disabled, some open ports might not be discovered")
             masscan.rate = arguments.max_rate
 
         scanning_start = time.perf_counter()
 
         masscan.run(res)
 
+        # Report results from masscan
         logger.info("dumping results")
 
         if arguments.only_domains is True:
-            results = res.get_list(ips=False, domains=True)
+            results = res.get_scan_results(ips=False, domains=True)
         elif arguments.only_ips is True:
-            results = res.get_list(ips=True, domains=False)
+            results = res.get_scan_results(ips=True, domains=False)
         else:
-            results = res.get_list(ips=True, domains=True)
+            results = res.get_scan_results(ips=True, domains=True)
 
         for line in results:
             print(line)
+        
+        if arguments.output is not None:
+            logger.info("saving results to %s", arguments.output)
+            utils.save_results(results, arguments.output)
 
+        # Are we going to run nmap also? Set arguments for nmap
         if arguments.nmap is True:
             if arguments.interface is not None:
                 nmap.interface = arguments.interface
@@ -137,6 +181,9 @@ def main():
 
             if arguments.nmap_options is not None:
                 nmap.options = arguments.nmap_options
+
+            if arguments.enable_ipv6 is True:
+                nmap.enable_ipv6 = arguments.enable_ipv6
 
             nmap.run(res)
 

@@ -8,7 +8,6 @@ from jfscan import __version__
 
 CURRENT_VERSION = __version__.__version__
 
-
 class ArgumentHandler:
     def __init__(self):
         is_tty = bool(sys.stdin.isatty())
@@ -16,6 +15,7 @@ class ArgumentHandler:
         parser = argparse.ArgumentParser(description="JFScan - Just Fu*king Scan")
 
         group_ports = parser.add_mutually_exclusive_group(required=True)
+        group_logging = parser.add_mutually_exclusive_group(required=False)
         group_nmap = parser.add_argument_group()
         group_targets = parser.add_argument_group()
         group_output = parser.add_argument_group()
@@ -61,6 +61,18 @@ class ArgumentHandler:
             required=False,
         )
         group_scan_settings.add_argument(
+            "--enable-ipv6",
+            action="store_true",
+            help="enable IPv6 support, otherwise all IPv6 addresses will be ignored in the scanning process",
+            required=False,
+        )
+        group_scan_settings.add_argument(
+            "--scope",
+            action="store",
+            help="file path with IP adresses and CIDRs to control scope, expected format: IPv6, IPv4, IPv6 CIDR, IPv4 CIDR",
+            required=False,
+        )
+        group_scan_settings.add_argument(
             "-r",
             "--max-rate",
             action="store",
@@ -91,6 +103,12 @@ class ArgumentHandler:
             required=False,
         )
         group_scan_settings.add_argument(
+            "--source-ip",
+            action="store",
+            help="IP address of your interface for the masscan",
+            required=False,
+        )
+        group_scan_settings.add_argument(
             "--router-ip",
             action="store",
             help="IP address of your router for the masscan",
@@ -100,6 +118,12 @@ class ArgumentHandler:
             "--router-mac",
             action="store",
             help="MAC address of your router for the masscan",
+            required=False,
+        )
+        group_scan_settings.add_argument(
+            "--router-mac-ipv6",
+            action="store",
+            help="MAC address of your IPv6 router for the masscan",
             required=False,
         )
         group_output.add_argument(
@@ -117,10 +141,24 @@ class ArgumentHandler:
             required=False,
         )
         group_output.add_argument(
+            "-o",
+            "--output",
+            action="store",
+            help="output masscan's results to specified file",
+            required=False,
+        )
+        group_logging.add_argument(
             "-q",
             "--quite",
             action="store_true",
             help="output only results",
+            required=False,
+        )
+        group_logging.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            help="verbose output",
             required=False,
         )
         group_nmap.add_argument(
@@ -142,7 +180,7 @@ class ArgumentHandler:
         group_nmap.add_argument(
             "--nmap-output",
             action="store",
-            help="path to save output file in XML format (same as nmap option -oX)",
+            help="output results from nmap to specified file in standard XML format (same as nmap option -oX)",
         )
         group_version.add_argument(
             "--version", action="version", version=CURRENT_VERSION
@@ -157,8 +195,22 @@ class ArgumentHandler:
                 )
 
         if args.router_ip is not None:
-            if validators.ipv4(args.router_ip) is not True:
+            if validators.ipv4(args.router_ip) or validators.ipv6(args.router_ip) is not True:
                 parser.error("--router-ip has to be an IP addresses")
+
+        if args.source_ip is not None:
+            if validators.ipv4(args.source_ip) or validators.ipv6(args.source_ip) is not True:
+                parser.error("--source-ip has to be an IP addresses")
+
+        if args.router_mac is not None:
+            if validators.mac_address(args.router_mac) is not True:
+                parser.error("--router-mac has to be an MAC addresses")
+
+        if args.router_mac_ipv6 is not None:
+            if args.enable_ipv6 is False:
+                parser.error("you have to enable ipv6 by --enable-ipv6 before using option --router-mac-ipv6")
+            if validators.mac_address(args.router_mac_ipv6) is not True:
+                parser.error("--router-mac-ipv6 has to be an MAC addresses")
 
         if args.ports is not None:
             port_chars = re.compile(r"^[0-9,\-]+$")
@@ -191,6 +243,9 @@ class ArgumentHandler:
                     parser.error("resolvers must be specified as IP addresses")
 
         self.quite = args.quite
+        self.verbose = args.verbose
+        self.scope = args.scope
+        self.enable_ipv6 = args.enable_ipv6
         self.ports = args.ports
         self.top_ports = args.top_ports
         self.yummy_ports = args.yummy_ports
@@ -199,13 +254,18 @@ class ArgumentHandler:
         self.wait = args.wait
         self.disable_auto_rate = args.disable_auto_rate
         self.interface = args.interface
+        self.source_ip = args.source_ip
         self.router_ip = args.router_ip
         self.router_mac = args.router_mac
+        self.router_mac_ipv6 = args.router_mac_ipv6
         self.targets = args.targets
         self.target = args.target
         self.only_domains = args.only_domains
         self.only_ips = args.only_ips
+        self.output = args.output
         self.nmap = args.nmap
         self.nmap_options = args.nmap_options
         self.nmap_threads = args.nmap_threads
         self.nmap_output = args.nmap_output
+
+

@@ -1,7 +1,5 @@
 import logging
 import os
-import json
-
 
 class Masscan:
     def __init__(self, utils):
@@ -14,7 +12,9 @@ class Masscan:
         self.top_ports = None
         self.interface = None
         self.router_ip = None
+        self.source_ip = None
         self.router_mac = None
+        self.router_mac_ipv6 = None
 
     def run(self, resources):
         """
@@ -27,7 +27,9 @@ class Masscan:
 
         interface = self.interface
         router_ip = self.router_ip
+        source_ip = self.source_ip
         router_mac = self.router_mac
+        router_mac_ipv6 = self.router_mac_ipv6
         top_ports = self.top_ports
         ports = self.ports
         rate = self.rate
@@ -45,7 +47,6 @@ class Masscan:
             raise SystemExit
 
         masscan_input = f"/tmp/_jfscan_{utils.random_string()}"
-        masscan_output = f"/tmp/_jfscan_{utils.random_string()}"
 
         with open(masscan_input, "a") as f:
             if len(ips) != 0:
@@ -57,65 +58,63 @@ class Masscan:
                     f.write(f"{cidr}\n")
 
         result = utils.handle_command(
-            f"masscan{' --wait ' + str(wait) if wait is not None else ''}{' --interface ' + interface if interface is not None else ''}{' --router-mac ' + router_mac if router_mac is not None else ''}{' --router-ip ' + router_ip if router_ip is not None else ''}{' --ports ' + ports if top_ports is None else ' --top-ports ' + str(top_ports)} --open --max-rate {rate} -iL {masscan_input} -oJ {masscan_output}",
+            f"masscan{' --wait ' + str(wait) if wait is not None else ''}{' --interface ' + interface if interface is not None else ''}{' --source-ip ' + source_ip if source_ip is not None else ''}{' --router-mac ' + router_mac if router_mac is not None else ''}{' --router-mac-ipv6 ' + router_mac_ipv6 if router_mac_ipv6 is not None else ''}{' --router-ip ' + router_ip if router_ip is not None else ''}{' --ports ' + ports if top_ports is None else ' --top-ports ' + str(top_ports)} --open --max-rate {rate} -iL {masscan_input}",
             stream_output,
         )
 
-        if "FAIL: could not determine default interface" in result.stderr.decode(
-            "utf-8"
-        ):
-            logger.error(
+        result_stderr = result.stderr.decode("utf-8")
+
+        if "FAIL: could not determine default interface" in result_stderr:
+            logger.fatal(
                 "could not determine default interface, specify it using --interface <interface for scanning>"
             )
             raise SystemExit
 
-        if "BIOCSETIF failed: Device not configured" in result.stderr.decode("utf-8"):
-            logger.error(
+        if "FAIL: scan range too large, max is" in result_stderr:
+            logger.fatal(
+                "scan range too large, are you trying to scan large IPv6 network?"
+            )
+            raise SystemExit
+
+        if "FAIL: failed to detect IPv6 address of interface" in result_stderr:
+            logger.fatal(
+                "are you sure you have IPv6? Try to specify --router-mac-ipv6 <ipv6 router mac address> ($ ip neigh) or --source-ip <your ipv6>"
+            )
+            raise SystemExit
+
+        if "BIOCSETIF failed: Device not configured" in result_stderr:
+            logger.fatal(
                 "interface %s does not exists or can't be used for scanning", interface
             )
             raise SystemExit
 
-        if "FAIL: failed to detect IP of interface" in result.stderr.decode("utf-8"):
-            logger.error("interface %s has no IP address set", interface)
+        if "FAIL: failed to detect IP of interface" in result_stderr:
+            logger.fatal("interface %s has no IP address set", interface)
             raise SystemExit
 
         if (
             "FAIL: ARP timed-out resolving MAC address for router"
-            in result.stderr.decode("utf-8")
+            in result_stderr
         ):
-            logger.error(
+            logger.fatal(
                 "can't resolve MAC address for router, please specify --router-ip <IP of your router>"
             )
             raise SystemExit
+        
+        result_stdout = result.stdout.decode("utf-8")
 
-        if utils.file_is_empty(masscan_output):
+        if "Discovered open port " not in result_stdout:
             logger.info(
                 "no open ports were discovered (maybe something went wrong with your connection?)"
             )
-            try:
-                os.remove(masscan_input)
-                os.remove(masscan_output)
-            except:
-                pass
-
             raise SystemExit
+        
+        for line in result_stdout.splitlines():
+            if line.startswith("Discovered open port "):
+                items = line.split(" ")
 
-        with open(masscan_output, "r") as masscan_results:
-            try:
-                masscan_results = json.load(masscan_results)
-            except Exception as e:
-                logger.fatal(
-                    "output from masscan is not readable, expected valid json (masscan's bug?):\n%s",
-                    e,
-                )
-                raise SystemExit
+                protocol = items[3].split("/")[1]
+                port = items[3].split("/")[0]
+                ip = items[5]
 
-        for r in masscan_results:
-            for port in r["ports"]:
-                resources.add_port(r["ip"], port["port"], port["proto"])
-
-        try:
-            os.remove(masscan_input)
-            os.remove(masscan_output)
-        except:
-            pass
+                resources.report_port(ip, port, protocol)

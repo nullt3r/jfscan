@@ -9,16 +9,23 @@ class Nmap:
         self.logger = logging.getLogger(__name__)
         self.utils = utils
 
+        self.enable_ipv6 = False
         self.interface = None
         self.options = None
         self.output = None
         self.threads = 8
 
     def _run_single_nmap(self, _args):
-        logger = self.logger
         utils = self.utils
 
-        domains, host, ports, options, interface, output = _args
+        from jfscan.core.logging_formatter import CustomFormatter
+
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(CustomFormatter())
+        logger.addHandler(stream_handler)
+
+        domains, host, ports, options, interface, output, enable_ipv6 = _args
 
         if len(ports) == 0:
             return
@@ -35,27 +42,25 @@ class Nmap:
         stdout_buffer = ""
 
         if output is not None:
-            nmap_output = f"/tmp/_jfscan_{utils.random_string()}.xml"
-            result = utils.handle_command(
-                f"nmap{' -e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options} -oX {nmap_output}"
-            )
-        else:
-            result = utils.handle_command(
-                f"nmap{' -e ' + interface if interface is not None else ''} --noninteractive -Pn {host} -p {ports} {options}"
-            )
+            nmap_output = '/tmp/_jfscan_' + utils.random_string() + '.xml'
+
+        result = utils.handle_command(
+            f"nmap{' -e ' + interface if interface is not None else ''}{' -6 ' if enable_ipv6 is True else ''} --noninteractive -Pn {host} -p {ports}{' '+options if options is not None else ''}{' -oX ' + nmap_output if output is not None else ''}"
+        )
+
+        result_stdout = result.stdout.decode("utf-8")
+        result_stderr = result.stderr.decode("utf-8")
 
         if (
             "I cannot figure out what source address to use for device"
-            in result.stderr.decode("utf-8")
+            in result_stderr
         ):
-            logger.error("interface does not exists or can't be used for scanning")
+            logger.fatal("interface does not exists or can't be used for scanning")
             raise SystemExit
 
-        if "Could not find interface" in result.stderr.decode("utf-8"):
-            logger.error("interface does not exists or can't be used for scanning")
+        if "Could not find interface" in result_stderr:
+            logger.fatal("interface does not exists or can't be used for scanning")
             raise SystemExit
-
-        nmap_stdout = result.stdout.decode("utf-8")
 
         if len(domains) == 0:
             f_host_domain = f" {host} "
@@ -66,12 +71,14 @@ class Nmap:
         stdout_buffer += "│"
 
         if (
-            "Nmap done: 1 IP address (0 hosts up)" in nmap_stdout
+            "Nmap done: 1 IP address (0 hosts up)" in result_stdout
             or result.returncode != 0
         ):
-            stdout_buffer += f"Host {host} seems down now, your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n\n"
+            stdout_buffer += "Host is down.\n\n"
+
+            logger.error("Host %s seems down, but was up while scanning with the masscan, maybe your network connection is not able to handle the scanning, \nare you scanning over a wifi? Try VPS or ethernet instead.\n\n", host)
         else:
-            nmap_stdout = "\n│ ".join(nmap_stdout.splitlines()[3:][:-2]) + "\n"
+            nmap_stdout = "\n│ ".join(result_stdout.splitlines()[3:][:-2]) + "\n"
 
             output_in_colors = nmap_stdout.replace(
                 " open ", "\033[1m\033[92m open \033[0m"
@@ -85,13 +92,13 @@ class Nmap:
 
             stdout_buffer += output_in_colors
 
-            print(stdout_buffer)
+        print(stdout_buffer)
 
         if output is not None:
             if utils.file_is_empty(nmap_output):
                 return None
-            else:
-                return nmap_output
+
+            return nmap_output
 
     def run(self, resources):
         logger = self.logger
@@ -100,22 +107,21 @@ class Nmap:
         options = self.options
         interface = self.interface
         output = self.output
+        enable_ipv6 = self.enable_ipv6
 
         logger.info("service discovery using nmap started\n")
 
-        nmap_input = resources.get_domains_ips_and_ports()
+        nmap_input = resources.get_results_complex()
 
         if len(nmap_input) == 0:
             logger.error("no resources were given, nothing to scan")
             return
 
         process_pool = multiprocessing.Pool(processes=threads)
-
         run = process_pool.map(
             self._run_single_nmap,
-            [target + (options, interface, output) for target in nmap_input],
+            [target + (options, interface, output, enable_ipv6) for target in nmap_input],
         )
-
         process_pool.close()
 
         if output is not None:
