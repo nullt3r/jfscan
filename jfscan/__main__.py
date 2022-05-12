@@ -182,9 +182,6 @@ def main():
             if arguments.nmap_options is not None:
                 nmap.options = arguments.nmap_options
 
-            if arguments.enable_ipv6 is True:
-                nmap.enable_ipv6 = arguments.enable_ipv6
-
             nmap.run(res)
 
         scanning_stop = time.perf_counter()
