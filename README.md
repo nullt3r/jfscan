@@ -10,6 +10,8 @@
 * It works in stdin/stdout mode, allowing you to stream results to/from other tools.
 * Auto-adjusts a packet rate for masscan so you don't have to (disable it by --disable-auto-rate).
 * Produces a standard Nmap XML report.
+* Fully supports IPv6.
+* Supports scope control, only targets defined in scope will be scanned.
 
 The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
 
@@ -27,8 +29,8 @@ JFScans logic of input & output processing:
 
 # Usage
 ```
-usage: jfscan [-h] [--targets TARGETS] (-p PORTS | --top-ports TOP_PORTS | --yummy-ports) [--resolvers RESOLVERS] [-r MAX_RATE] [--wait WAIT] [--disable-auto-rate] [-i INTERFACE] [--router-ip ROUTER_IP] [--router-mac ROUTER_MAC] [-oi] [-od] [-q]
-              [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT] [--version]
+usage: jfscan [-h] [--targets TARGETS] (-p PORTS | --top-ports TOP_PORTS | --yummy-ports) [--resolvers RESOLVERS] [--enable-ipv6] [--scope SCOPE] [-r MAX_RATE] [--wait WAIT] [--disable-auto-rate] [-i INTERFACE] [--source-ip SOURCE_IP]
+              [--router-ip ROUTER_IP] [--router-mac ROUTER_MAC] [--router-mac-ipv6 ROUTER_MAC_IPV6] [-oi] [-od] [-o OUTPUT] [-q | -v] [--nmap] [--nmap-options NMAP_OPTIONS] [--nmap-threads NMAP_THREADS] [--nmap-output NMAP_OUTPUT] [--version]
               [target]
 
 JFScan - Just Fu*king Scan
@@ -40,6 +42,8 @@ optional arguments:
   --top-ports TOP_PORTS
                         scan only N of the top ports, e. g., --top-ports 1000
   --yummy-ports         scan only for the most yummy ports
+  -q, --quite           output only results
+  -v, --verbose         verbose output
 
   --nmap                run nmap on discovered ports
   --nmap-options NMAP_OPTIONS
@@ -47,27 +51,34 @@ optional arguments:
   --nmap-threads NMAP_THREADS
                         number of nmaps to run concurrently, default 8
   --nmap-output NMAP_OUTPUT
-                        path to save output file in XML format (same as nmap option -oX)
+                        output results from nmap to specified file in standard XML format (same as nmap option -oX)
 
   target                a target or targets separated by a comma, accepted form is: domain name, IPv4, IPv6, URL
   --targets TARGETS     file with targets, accepted form is: domain name, IPv4, IPv6, URL
 
   -oi, --only-ips       output only IP adresses, default: all resources
   -od, --only-domains   output only domains, default: all resources
-  -q, --quite           output only results
+  -o OUTPUT, --output OUTPUT
+                        output masscan's results to specified file
 
   --resolvers RESOLVERS
                         custom resolvers separated by a comma, e. g., 8.8.8.8,1.1.1.1
+  --enable-ipv6         enable IPv6 support, otherwise all IPv6 addresses will be ignored in the scanning process
+  --scope SCOPE         file path with IP adresses and CIDRs to control scope, expected format: IPv6, IPv4, IPv6 CIDR, IPv4 CIDR
   -r MAX_RATE, --max-rate MAX_RATE
                         max kpps rate for the masscan
   --wait WAIT           a number of seconds to wait for packets to arrive (when scanning large networks), option for the masscan
   --disable-auto-rate   disable rate adjustment mechanism for masscan (more false positives/negatives)
   -i INTERFACE, --interface INTERFACE
                         interface for masscan and nmap to use
+  --source-ip SOURCE_IP
+                        IP address of your interface for the masscan
   --router-ip ROUTER_IP
                         IP address of your router for the masscan
   --router-mac ROUTER_MAC
                         MAC address of your router for the masscan
+  --router-mac-ipv6 ROUTER_MAC_IPV6
+                        MAC address of your IPv6 router for the masscan
 
   --version             show program's version number and exit
 ```
