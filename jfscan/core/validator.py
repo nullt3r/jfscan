@@ -19,14 +19,14 @@ class Validator:
     @staticmethod
     def is_ipv6_cidr(addr):
         try:
-            return type(ipaddress.ip_network(addr)) is ipaddress.IPv6Network
+            return type(ipaddress.ip_network(addr, False)) is ipaddress.IPv6Network
         except:
             return False
 
     @staticmethod
     def is_ipv4_cidr(addr):
         try:
-            return type(ipaddress.ip_network(addr)) is ipaddress.IPv4Network
+            return type(ipaddress.ip_network(addr, False)) is ipaddress.IPv4Network
         except:
             return False
 
@@ -49,5 +49,5 @@ class Validator:
 
     @staticmethod
     def is_domain(domain):
-        import validators
-        return validators.domain(domain)
+        from validators import domain
+        return domain(domain)
