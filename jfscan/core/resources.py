@@ -224,7 +224,7 @@ class Resources():
             for row in rows:
                 results.append(f"{row[0]}:{row[2]}")
 
-        return results
+        return list(set(results))
 
     def count_ips(self):
         """Get number of all IPs to scan, including IPs in network ranges
