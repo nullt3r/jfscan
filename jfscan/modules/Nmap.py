@@ -107,7 +107,6 @@ class Nmap:
         options = self.options
         interface = self.interface
         output = self.output
-        enable_ipv6 = self.enable_ipv6
 
         logger.info("service discovery using nmap started\n")
 
