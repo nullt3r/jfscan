@@ -222,6 +222,8 @@ class Utils:
 
             elif Validator.is_ipv4_cidr(_target) or Validator.is_ipv6_cidr(_target):
                 res.add_cidr(_target)
+            else:
+                logger.warning("host %s is in unrecognized format, skipping...", _target)
 
             target_before = _target
 
