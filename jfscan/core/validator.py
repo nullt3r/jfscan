@@ -48,6 +48,6 @@ class Validator:
         return False
 
     @staticmethod
-    def is_domain(domain):
+    def is_domain(host):
         from validators import domain
-        return domain(domain)
+        return domain(host)

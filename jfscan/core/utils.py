@@ -225,6 +225,7 @@ class Utils:
 
             target_before = _target
 
+    # Oh, just remove it already...
     @staticmethod
     def file_is_empty(file):
         try:

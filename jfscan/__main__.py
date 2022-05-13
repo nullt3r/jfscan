@@ -154,16 +154,20 @@ def main():
         # Report results from masscan
         logger.info("dumping results")
 
+        results = []
+        result_ips, result_domains = res.get_scan_results()
+
         if arguments.only_domains is True:
-            results = res.get_scan_results(ips=False, domains=True)
+            results = result_domains
         elif arguments.only_ips is True:
-            results = res.get_scan_results(ips=True, domains=False)
+            results = result_ips
         else:
-            results = res.get_scan_results(ips=True, domains=True)
+            results = result_ips + result_domains
 
         for line in results:
             print(line)
-        
+
+        # Save results to file
         if arguments.output is not None:
             logger.info("saving results to %s", arguments.output)
             utils.save_results(results, arguments.output)

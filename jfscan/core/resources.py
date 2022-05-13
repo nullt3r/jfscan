@@ -194,7 +194,7 @@ class Resources():
 
         return cidrs
 
-    def get_scan_results(self, ips=False, domains=False):
+    def get_scan_results(self):
         """Generates scan results in format target:port
 
         Args:
@@ -206,25 +206,32 @@ class Resources():
         """
         conn = self.conn
         cur = conn.cursor()
-        results = []
 
-        if ips is True:
-            rows = cur.execute(
-                "SELECT DISTINCT ip, port FROM scan_results"
-            ).fetchall()
-            for row in rows:
-                results.append(f"{row[0]}:{row[1]}")
+        ips = []
+        domains = []
 
-        if domains is True:
-            rows = cur.execute(
-                "SELECT DISTINCT domain, ip, port FROM scan_results\
-                 JOIN domains_to_scan ON domain = domains_to_scan.domain WHERE domains_to_scan.ip_rowid = (SELECT rowid FROM ips_to_scan WHERE ip = scan_results.ip) ORDER BY domain"
-            ).fetchall()
+        rows = cur.execute(
+            "SELECT DISTINCT ip, port FROM scan_results"
+        ).fetchall()
+        for row in rows:
+            ips.append(f"{row[0]}:{row[1]}")
 
-            for row in rows:
-                results.append(f"{row[0]}:{row[2]}")
 
-        return list(set(results))
+        rows = cur.execute(
+            "SELECT DISTINCT domain, ip, port FROM scan_results\
+                JOIN domains_to_scan ON domain = domains_to_scan.domain WHERE domains_to_scan.ip_rowid = (SELECT rowid FROM ips_to_scan WHERE ip = scan_results.ip) ORDER BY domain"
+        ).fetchall()
+
+        for row in rows:
+            domains.append(f"{row[0]}:{row[2]}")
+        
+        ips_unique = list(set(ips))
+        domains_unique = list(set(domains))
+
+        ips_unique.sort()
+        domains_unique.sort()
+
+        return ips_unique, domains_unique
 
     def count_ips(self):
         """Get number of all IPs to scan, including IPs in network ranges
