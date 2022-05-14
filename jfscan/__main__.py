@@ -152,7 +152,7 @@ def main():
         masscan.run(res)
 
         # Report results from masscan
-        logger.info("dumping results")
+        logger.info("showing results")
 
         results = []
         result_ips, result_domains = res.get_scan_results()
