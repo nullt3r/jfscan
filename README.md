@@ -110,12 +110,13 @@ Utilize nmap to gather more info about discovered services:
 
 `$ cat targets.txt | jfscan -p 0-65535 --nmap --nmap-options="-sV --scripts ssh-auth-methods"`
 
-The targets.txt can contain targets in the following forms:
+The targets.txt can contain targets in the following forms (IPv6 similarly):
 ```
 http://domain.com/
 domain.com
 1.2.3.4
 1.2.3.0/24
+1.1.1.1-1.1.1.30
 ```
 
 # Installation
