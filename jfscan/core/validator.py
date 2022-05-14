@@ -31,6 +31,26 @@ class Validator:
             return False
 
     @staticmethod
+    def is_ipv4_range(ip_range):
+        ip_range = ip_range.split("-")
+        try:
+            if (type(ipaddress.ip_address(ip_range[0])) is ipaddress.IPv4Address
+                    and type(ipaddress.ip_address(ip_range[1])) is ipaddress.IPv4Address):
+                return True
+        except:
+            return False
+
+    @staticmethod
+    def is_ipv6_range(ip_range):
+        ip_range = ip_range.split("-")
+        try:
+            if (type(ipaddress.ip_address(ip_range[0])) is ipaddress.IPv6Address
+                    and type(ipaddress.ip_address(ip_range[1])) is ipaddress.IPv6Address):
+                return True
+        except:
+            return False
+
+    @staticmethod
     def is_mac(mac) -> bool:
         is_valid_mac = re.match(r'([0-9A-F]{2}[:]){5}[0-9A-F]{2}|'
                                 r'([0-9A-F]{2}[-]){5}[0-9A-F]{2}',

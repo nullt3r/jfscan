@@ -200,19 +200,14 @@ class Utils:
             logger.error("no valid targets were specified")
             raise SystemExit
 
-        target_before = None
 
-        for _target in targets:
-
-            # In case the target is URL, we have to extract it first before further checks
-            if Validator.is_url(_target):
-                _target = _target.split("/")[2]
-
-            # If the next target is same as the one before, we can move onto another one
-            if _target == target_before:
-                continue
+        for _target in list(set(targets)):
 
             _target = _target.strip()
+
+            # Domain from URL must be extracted first
+            if Validator.is_url(_target):
+                _target = _target.split("/")[2]
 
             if Validator.is_domain(_target):
                 res.add_domain(_target)
@@ -222,10 +217,63 @@ class Utils:
 
             elif Validator.is_ipv4_cidr(_target) or Validator.is_ipv6_cidr(_target):
                 res.add_cidr(_target)
+
+            elif Validator.is_ipv4_range(_target):
+                cidrs = self.ipv4_range_to_cidrs(_target)
+
+                logger.debug("IP range %s was divided into the following CIDRs: %s", _target, ", ".join(cidrs))
+
+                for cidr in cidrs:
+                    res.add_cidr(cidr)
+
+            elif Validator.is_ipv6_range(_target):
+                cidrs = self.ipv6_range_to_cidrs(_target)
+
+                logger.debug("IP range %s was divided into the following CIDRs: %s", _target, ", ".join(cidrs))
+
+                for cidr in cidrs:
+                    res.add_cidr(cidr)
+
             else:
                 logger.warning("host %s is in unrecognized format, skipping...", _target)
 
-            target_before = _target
+    @staticmethod
+    def ipv4_range_to_cidrs(ip_range):
+        """Converts target specified as IP range (inetnum) to CIDR(s)
+
+        Args:
+            ip_range (str): IP range - 192.168.0.0-192.168.1.255
+
+        Returns:
+            list: list of CIDR(s)
+        """
+        import ipaddress
+        try:
+            ip_range = ip_range.split("-")
+            startip = ipaddress.IPv4Address(ip_range[0])
+            endip = ipaddress.IPv4Address(ip_range[1])
+            return [str(ipaddr) for ipaddr in ipaddress.summarize_address_range(startip, endip)]
+        except:
+            return None
+
+    @staticmethod
+    def ipv6_range_to_cidrs(ip_range):
+        """Converts target specified as IP range (inetnum) to CIDR(s)
+
+        Args:
+            ip_range (str): IP range - 2620:0:2d0:200::7-2620:0:2d0:2df::7
+
+        Returns:
+            list: list of CIDR(s)
+        """
+        import ipaddress
+        try:
+            ip_range = ip_range.split("-")
+            startip = ipaddress.IPv6Address(ip_range[0])
+            endip = ipaddress.IPv6Address(ip_range[1])
+            return [str(ipaddr) for ipaddr in ipaddress.summarize_address_range(startip, endip)]
+        except:
+            return None
 
     # Oh, just remove it already...
     @staticmethod
