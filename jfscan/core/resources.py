@@ -15,7 +15,7 @@ class Resources():
             self.conn = sqlite3.connect(":memory:")
         except Exception:
             self.logger.fatal("%s could not create database", bin)
-            raise SystemExit
+            raise SystemExit(1)
 
         cur = self.conn.cursor()
 
@@ -303,7 +303,7 @@ class Resources():
                 "scope file is empty or does not exists: %s",
                 file_path,
             )
-            raise SystemExit
+            raise SystemExit(1)
 
         with open(file_path, "r", encoding='UTF-8') as scope:
             for scope_item in scope.readlines():

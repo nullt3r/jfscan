@@ -44,7 +44,7 @@ class Masscan:
 
         if len(ips) == 0 and len(cidrs) == 0:
             logger.error("no resources were given, nothing to scan")
-            raise SystemExit
+            raise SystemExit(1)
 
         masscan_input = f"/tmp/_jfscan_{utils.random_string()}"
 
@@ -68,29 +68,29 @@ class Masscan:
             logger.fatal(
                 "could not determine default interface, specify it using --interface <interface for scanning>"
             )
-            raise SystemExit
+            raise SystemExit(1)
 
         if "FAIL: scan range too large, max is" in result_stderr:
             logger.fatal(
                 "scan range too large, are you trying to scan large IPv6 network?"
             )
-            raise SystemExit
+            raise SystemExit(1)
 
         if "FAIL: failed to detect IPv6 address of interface" in result_stderr:
             logger.fatal(
                 "are you sure you have IPv6? Try to specify --router-mac-ipv6 <ipv6 router mac address> ($ ip neigh) or --source-ip <your ipv6>"
             )
-            raise SystemExit
+            raise SystemExit(1)
 
         if "BIOCSETIF failed: Device not configured" in result_stderr:
             logger.fatal(
                 "interface %s does not exists or can't be used for scanning", interface
             )
-            raise SystemExit
+            raise SystemExit(1)
 
         if "FAIL: failed to detect IP of interface" in result_stderr:
             logger.fatal("interface %s has no IP address set", interface)
-            raise SystemExit
+            raise SystemExit(1)
 
         if (
             "FAIL: ARP timed-out resolving MAC address for router"
@@ -99,7 +99,7 @@ class Masscan:
             logger.fatal(
                 "can't resolve MAC address for router, please specify --router-ip <IP of your router>"
             )
-            raise SystemExit
+            raise SystemExit(1)
         
         result_stdout = result.stdout.decode("utf-8")
 
@@ -107,7 +107,7 @@ class Masscan:
             logger.info(
                 "no open ports were discovered (maybe something went wrong with your connection?)"
             )
-            raise SystemExit
+            raise SystemExit(1)
         
         for line in result_stdout.splitlines():
             if line.startswith("Discovered open port "):

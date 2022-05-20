@@ -31,7 +31,7 @@ class Utils:
         if result.returncode == 1:
             logger.fatal("%s is not installed", binary)
 
-            raise SystemExit
+            raise SystemExit(1)
 
         if version_flag and version_string is not None:
             result = subprocess.run(
@@ -48,7 +48,7 @@ class Utils:
                     version_string,
                 )
 
-                raise SystemExit
+                raise SystemExit(1)
 
     def handle_command(self, cmd, stream_output=False):
         logger = self.logger
@@ -184,7 +184,7 @@ class Utils:
                     "input file is empty or does not exists: %s",
                     targets_file,
                 )
-                raise SystemExit
+                raise SystemExit(1)
 
             with open(targets_file, "r", encoding="UTF-8") as _file:
                 targets += _file.readlines()
@@ -198,7 +198,7 @@ class Utils:
 
         if len(targets) == 0:
             logger.error("no valid targets were specified")
-            raise SystemExit
+            raise SystemExit(1)
 
 
         for _target in list(set(targets)):

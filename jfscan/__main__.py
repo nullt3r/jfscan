@@ -125,10 +125,10 @@ def main():
 
         if ip_count == 0:
             logger.error("nothing to scan, no domains were resolved")
-            raise SystemExit
+            raise SystemExit(1)
         elif ip_count > 2**32:
             logger.fatal("number of IPs to be scanned is very large (%s to be exact), you probably specified wrong IPv6 network range...", ip_count)
-            raise SystemExit
+            raise SystemExit(1)
 
         # Lets continue if number of IPs to be scanned is acceptable
         logger.info("%s unique IP addresses will be scanned", ip_count)
@@ -206,7 +206,7 @@ def main():
         for jfscan_file in glob.glob("/tmp/_jfscan_*"):
             os.remove(jfscan_file)
 
-        raise SystemExit
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

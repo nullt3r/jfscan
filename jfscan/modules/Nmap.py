@@ -56,11 +56,11 @@ class Nmap:
             in result_stderr
         ):
             logger.fatal("interface does not exists or can't be used for scanning")
-            raise SystemExit
+            raise SystemExit(1)
 
         if "Could not find interface" in result_stderr:
             logger.fatal("interface does not exists or can't be used for scanning")
-            raise SystemExit
+            raise SystemExit(1)
 
         if len(domains) == 0:
             f_host_domain = f" {host} "
