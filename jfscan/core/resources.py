@@ -297,6 +297,7 @@ class Resources():
 
         logger = self.logger
         file_path = self.scope_file
+        utils = self.utils
 
         if self.utils.file_is_empty(file_path):
             logger.fatal(
@@ -327,7 +328,7 @@ class Resources():
                             return True
 
                 # If scope item is in CIDR notation
-                if Validator.is_ipv4_cidr(scope_item):
+                elif Validator.is_ipv4_cidr(scope_item):
                     # If checked target is just IP
                     if Validator.is_ipv4(target):
                         # We just ask if the target is part of network
@@ -343,6 +344,9 @@ class Resources():
 
                 # If scope item is just IP
                 elif target == scope_item:
+                    return True
+
+                elif target in utils.resolve_host(scope_item):
                     return True
 
         # By default, we want to return False
