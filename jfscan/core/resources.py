@@ -311,8 +311,12 @@ class Resources():
 
                 scope_item = scope_item.strip()
 
+                # If scope item is just IP
+                if target == scope_item:
+                    return True
+
                 # If scope item is in CIDR notation
-                if Validator.is_ipv6_cidr(scope_item):
+                elif Validator.is_ipv6_cidr(scope_item):
 
                     # If checked target is just IP
                     if Validator.is_ipv6(target):
@@ -342,12 +346,11 @@ class Resources():
                         if network.supernet_of(ipaddress.ip_network(target)) is True:
                             return True
 
-                # If scope item is just IP
-                elif target == scope_item:
-                    return True
-
-                elif target in utils.resolve_host(scope_item):
-                    return True
+                elif Validator.is_domain(scope_item) is True:
+                    resolved_scope_item = utils.resolve_host(scope_item)
+                    if resolved_scope_item is not None:
+                        if target in resolved_scope_item:
+                            return True
 
         # By default, we want to return False
         return False
