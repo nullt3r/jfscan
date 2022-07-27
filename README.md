@@ -13,7 +13,7 @@
 * Fully supports IPv6.
 * Supports scope control, only targets defined in scope will be scanned.
 
-The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
+Turn never-ending Nmap scans into 5 minutes. The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan and Nmap. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
 
 The JFScan also allows you to output only the results and chain it with other tools like Nuclei. The domain:port output of JFScan is crucial if you want to discover vulnerabilities in web applications as the virtual host decides which content will be served.
 
