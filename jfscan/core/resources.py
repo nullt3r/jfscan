@@ -249,9 +249,9 @@ class Resources():
 
         for (cidr,) in cidrs:
             if Validator.is_ipv6_cidr(cidr):
-                address_count += (2 ** (128 - int(cidr.split("/")[1]))) - 2
+                address_count += (2 ** (128 - int(cidr.split("/")[1])))
             elif Validator.is_ipv4_cidr(cidr):
-                address_count += (2 ** (32 - int(cidr.split("/")[1]))) - 2
+                address_count += (2 ** (32 - int(cidr.split("/")[1])))
 
         ips_count = cur.execute("SELECT count(DISTINCT ip) FROM ips_to_scan").fetchall()
 
