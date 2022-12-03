@@ -4,14 +4,14 @@
 
 # Description
 ## Killing features
-* Perform a large-scale scans using Nmap! Allows you to use Masscan to scan targets and execute Nmap on detected ports with custom settings. Nmap on steroids. *
-* Scans targets in variety of formats, including domain names!
-* Results can be produced in domain:port format.
-* It works in stdin/stdout mode, allowing you to stream results to/from other tools.
-* Auto-adjusts a packet rate for masscan so you don't have to (disable it by --disable-auto-rate).
-* Produces a standard Nmap XML report.
-* Fully supports IPv6.
-* Supports scope control, only targets defined in scope will be scanned.
+* Unleash the power of Nmap with Masscan for large-scale scans
+* Scan targets using domain names and other formats
+* Output results in a clean domain:port format
+* Stream results to and from other tools using stdin/stdout mode
+* Enjoy hassle-free scanning with automatic packet rate adjustment for Masscan
+* Generate professional-grade Nmap XML reports
+* Scan IPv6 targets without any issues
+* Stay focused and on target with scope control
 
 Turn never-ending Nmap scans into 5 minutes. The JFScan (Just Fu*king Scan) is a wrapper around a super-fast port scanner Masscan and Nmap. It's designed to simplify work when scanning for open ports on targets in a variety of formats. The JFScan accepts a target in the following forms: URL, domain, or IP (including CIDR). You can specify a file with targets using argument or use stdin.
 
