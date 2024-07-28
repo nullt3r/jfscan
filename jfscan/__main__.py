@@ -98,7 +98,9 @@ def main():
             masscan.ports = arguments.ports
             for _port in arguments.ports.split(","):
                 if "-" in _port:
-                    ports_count += int(_port.split("-")[1]) - int(_port.split("-")[0])
+                    high_port = 65535 if _port.split("-")[1].strip() == ""  else int(_port.split("-")[1])
+                    low_port = 0 if _port.split("-")[0].strip() == "" else int(_port.split("-")[0])
+                    ports_count += high_port - low_port
                 else:
                     ports_count += 1
 
