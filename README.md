@@ -9,8 +9,7 @@
 * Output results in a clean domain:port format
 * Stream results to and from other tools using stdin/stdout mode
 * Enjoy hassle-free scanning with automatic packet rate adjustment for Masscan
-* Generate professional-grade Nmap XML reports
-* Scan IPv6 targets without any issues
+* Generate Nmap XML reports
 * Stay focused and on target with scope control
 
 JFScan is a wrapper that leverages the speed of Masscan and Nmap's fingerprinting capabilities. JFScan accepts targets in the form of URLs, domains, or IPs (including CIDR). You can specify a file with targets using an argument, or use stdin.
