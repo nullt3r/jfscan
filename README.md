@@ -2,6 +2,8 @@
 ![GitHub](https://img.shields.io/github/license/nullt3r/jfscan) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nullt3r/jfscan) ![Rating](https://img.shields.io/github/stars/nullt3r/jfscan?style=social)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+Note: This project was replaced by newer version rewritten in Go - https://github.com/nullt3r/massmap
+
 # Description
 ## Killing features
 * Unleash the power of Nmap with Masscan for large-scale scans
